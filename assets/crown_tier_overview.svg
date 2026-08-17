@@ -1,0 +1,1491 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+
+<defs>
+  <filter id="sheetShadow" x="-30%" y="-30%" width="160%" height="170%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="blur"/>
+    <feOffset in="blur" dx="0" dy="10" result="offsetBlur"/>
+    <feColorMatrix in="offsetBlur" type="matrix"
+      values="0 0 0 0 0.027
+              0 0 0 0 0.063
+              0 0 0 0 0.122
+              0 0 0 0.16 0" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+
+<rect width="100%" height="100%" fill="#F6F8FB"/>
+<text x="60" y="58" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="#1B2230">王冠等级 SVG 素材（V13）</text>
+<text x="60" y="88" font-family="Inter, Arial, sans-serif" font-size="15" fill="#697386">黄金及以上：顶部小圆形改为菱形；铂金与紫水晶进一步变得更尖锐，底座更薄。</text>
+<rect x="18" y="117" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(62,123) scale(0.38)">
+
+    <defs>
+      <linearGradient id="bronze_base_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#3A1B12"/>
+        <stop offset="0.18" stop-color="#B86A3F"/>
+        <stop offset="0.36" stop-color="#E0A06C"/>
+        <stop offset="0.52" stop-color="#6B351D"/>
+        <stop offset="0.70" stop-color="#E0A06C"/>
+        <stop offset="1" stop-color="#3A1B12"/>
+      </linearGradient>
+      <linearGradient id="bronze_base_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#E0A06C"/>
+        <stop offset="0.28" stop-color="#B86A3F"/>
+        <stop offset="0.70" stop-color="#6B351D"/>
+        <stop offset="1" stop-color="#3A1B12"/>
+      </linearGradient>
+      <radialGradient id="bronze_base_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#E58A52"/>
+        <stop offset="0.62" stop-color="#B86A3F"/>
+        <stop offset="1" stop-color="#3A1B12"/>
+      </radialGradient>
+      <radialGradient id="bronze_base_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#E0A06C" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#B86A3F" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#B86A3F" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="bronze_base_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="bronze_base_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+    </defs>
+    
+
+      <g id="crown" filter="url(#bronze_base_shadow)">
+        <path d="M132 320 L126 238 L172 246 L200 198 L228 218 L256 180 L284 218 L312 198 L340 246 L386 238 L380 320 Q320 308 256 312 Q192 308 132 320 Z" fill="url(#bronze_base_metal)" stroke="#3A1B12" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M162 294 C186 288 208 290 228 294 C240 298 272 298 284 294 C304 290 326 288 350 294" fill="none" stroke="#E0A06C" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M142 320 C178 324 216 328 256 328 C296 328 334 324 370 320 L366 348 H146 Z" fill="url(#bronze_base_base)" stroke="#3A1B12" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M164 334 C194 338 224 340 256 340 C288 340 318 338 348 334" fill="none" stroke="#E0A06C" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#E0A06C" stroke-linecap="round" stroke-linejoin="round">
+<path d="M184 252 Q198 234 210 220" stroke-width="4" />
+<path d="M328 252 Q314 234 302 220" stroke-width="4" />
+</g>
+<circle cx="126" cy="238" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="200" cy="198" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="256" cy="180" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="312" cy="198" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="386" cy="238" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="172" cy="246" r="9" fill="url(#bronze_base_gem)" stroke="#3A1B12" stroke-width="4.8"/>
+<circle cx="340" cy="246" r="9" fill="url(#bronze_base_gem)" stroke="#3A1B12" stroke-width="4.8"/>
+<path d="M256 276 L276 296 L256 318 L236 296 Z" fill="url(#bronze_base_gem)" stroke="#3A1B12" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 284 L266 296 L256 308 L246 296 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+</g>
+<text x="160" y="435" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">青铜</text>
+<text x="160" y="458" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">BRONZE</text>
+<rect x="338" y="117" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(382,123) scale(0.38)">
+
+    <defs>
+      <linearGradient id="silver_base_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#41464D"/>
+        <stop offset="0.18" stop-color="#C7CED6"/>
+        <stop offset="0.36" stop-color="#F4F7FA"/>
+        <stop offset="0.52" stop-color="#70757C"/>
+        <stop offset="0.70" stop-color="#F4F7FA"/>
+        <stop offset="1" stop-color="#41464D"/>
+      </linearGradient>
+      <linearGradient id="silver_base_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F4F7FA"/>
+        <stop offset="0.28" stop-color="#C7CED6"/>
+        <stop offset="0.70" stop-color="#70757C"/>
+        <stop offset="1" stop-color="#41464D"/>
+      </linearGradient>
+      <radialGradient id="silver_base_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#B7E3FF"/>
+        <stop offset="0.62" stop-color="#C7CED6"/>
+        <stop offset="1" stop-color="#41464D"/>
+      </radialGradient>
+      <radialGradient id="silver_base_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#F4F7FA" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#C7CED6" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#C7CED6" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="silver_base_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="silver_base_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+    </defs>
+    
+
+      <g id="crown" filter="url(#silver_base_shadow)">
+        <path d="M122 320 L116 228 L162 236 L192 180 L220 210 L256 150 L292 210 L320 180 L350 236 L396 228 L390 320 Q324 306 256 310 Q188 306 122 320 Z" fill="url(#silver_base_metal)" stroke="#41464D" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M158 292 C184 282 208 286 228 294 C240 300 272 300 284 294 C304 286 328 282 354 292" fill="none" stroke="#F4F7FA" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M132 320 C170 326 212 332 256 332 C300 332 342 326 380 320 L374 350 H138 Z" fill="url(#silver_base_base)" stroke="#41464D" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M158 336 C190 342 222 344 256 344 C290 344 322 342 354 336" fill="none" stroke="#F4F7FA" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#F4F7FA" stroke-linecap="round" stroke-linejoin="round">
+<path d="M178 244 Q194 218 206 192" stroke-width="4" />
+<path d="M334 244 Q318 218 306 192" stroke-width="4" />
+<path d="M232 214 Q244 200 256 200 Q268 200 280 214" stroke-width="4" />
+</g>
+<circle cx="116" cy="228" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="192" cy="180" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="220" cy="210" r="6" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="256" cy="150" r="8" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="292" cy="210" r="6" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="320" cy="180" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="396" cy="228" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="162" cy="236" r="9" fill="url(#silver_base_gem)" stroke="#41464D" stroke-width="4.8"/>
+<circle cx="350" cy="236" r="9" fill="url(#silver_base_gem)" stroke="#41464D" stroke-width="4.8"/>
+<path d="M256 268 L280 296 L256 324 L232 296 Z" fill="url(#silver_base_gem)" stroke="#41464D" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 278 L268 296 L256 314 L244 296 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+</g>
+<text x="480" y="435" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">白银</text>
+<text x="480" y="458" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">SILVER</text>
+<rect x="658" y="117" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(702,123) scale(0.38)">
+
+    <defs>
+      <linearGradient id="gold_base_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#5A3200"/>
+        <stop offset="0.18" stop-color="#F0B52C"/>
+        <stop offset="0.36" stop-color="#FFF1A6"/>
+        <stop offset="0.52" stop-color="#9A5A00"/>
+        <stop offset="0.70" stop-color="#FFF1A6"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </linearGradient>
+      <linearGradient id="gold_base_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFF1A6"/>
+        <stop offset="0.28" stop-color="#F0B52C"/>
+        <stop offset="0.70" stop-color="#9A5A00"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </linearGradient>
+      <radialGradient id="gold_base_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#FFD45C"/>
+        <stop offset="0.62" stop-color="#F0B52C"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </radialGradient>
+      <radialGradient id="gold_base_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#FFF1A6" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#F0B52C" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#F0B52C" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="gold_base_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="gold_base_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+    </defs>
+    
+
+      <g id="crown" filter="url(#gold_base_shadow)">
+        <path d="M108 318 L100 218 L144 222 L176 166 L204 196 L228 146 L246 114 L256 96 L266 114 L284 146 L308 196 L336 166 L368 222 L412 218 L404 318 Q330 302 256 308 Q182 302 108 318 Z" fill="url(#gold_base_metal)" stroke="#5A3200" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M150 290 C178 278 206 284 230 294 C242 300 270 300 282 294 C306 284 334 278 362 290" fill="none" stroke="#FFF1A6" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M120 318 C162 326 208 332 256 332 C304 332 350 326 392 318 L384 350 H128 Z" fill="url(#gold_base_base)" stroke="#5A3200" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M148 336 C182 342 218 346 256 346 C294 346 330 342 364 336" fill="none" stroke="#FFF1A6" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#FFF1A6" stroke-linecap="round" stroke-linejoin="round">
+<path d="M160 226 Q182 192 200 158" stroke-width="4" />
+<path d="M352 226 Q330 192 312 158" stroke-width="4" />
+<path d="M228 146 L246 118 L256 132 L266 118 L284 146" stroke-width="4" />
+<path d="M204 196 Q228 182 256 182 Q284 182 308 196" stroke-width="4" />
+</g>
+<path d="M100 211 L107 218 L100 225 L93 218 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M176 159 L183 166 L176 173 L169 166 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M204 190 L210 196 L204 202 L198 196 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M256 87 L265 96 L256 105 L247 96 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M308 190 L314 196 L308 202 L302 196 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M336 159 L343 166 L336 173 L329 166 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M412 211 L419 218 L412 225 L405 218 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<circle cx="144" cy="222" r="9" fill="url(#gold_base_gem)" stroke="#5A3200" stroke-width="4.8"/>
+<circle cx="368" cy="222" r="9" fill="url(#gold_base_gem)" stroke="#5A3200" stroke-width="4.8"/>
+<path d="M256 256 L286 290 L256 330 L226 290 Z" fill="url(#gold_base_gem)" stroke="#5A3200" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 270 L272 290 L256 312 L240 290 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+<g>
+    <g transform="translate(256 96)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="7.0s" begin="4.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="7.0s" begin="4.0s" repeatCount="indefinite"/>
+      <path d="M0 -52 C3.4 -22.9 3.4 -10.4 0 0
+               C-3.4 -10.4 -3.4 -22.9 0 -52
+               M34 0 C15.0 5.2 6.8 5.2 0 0
+               C6.8 -5.2 15.0 -5.2 34 0
+               M0 52 C-3.4 22.9 -3.4 10.4 0 0
+               C3.4 10.4 3.4 22.9 0 52
+               M-34 0 C-15.0 -5.2 -6.8 -5.2 0 0
+               C-6.8 5.2 -15.0 5.2 -34 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="5.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(256 256)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <path d="M0 -66 C4.2 -29.0 4.2 -13.2 0 0
+               C-4.2 -13.2 -4.2 -29.0 0 -66
+               M42 0 C18.5 6.6 8.4 6.6 0 0
+               C8.4 -6.6 18.5 -6.6 42 0
+               M0 66 C-4.2 29.0 -4.2 13.2 0 0
+               C4.2 13.2 4.2 29.0 0 66
+               M-42 0 C-18.5 -6.6 -8.4 -6.6 0 0
+               C-8.4 6.6 -18.5 6.6 -42 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="7.1" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(144 222)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(368 222)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    </g>
+</g>
+<text x="800" y="435" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">黄金</text>
+<text x="800" y="458" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">GOLD</text>
+<rect x="978" y="117" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(1022,123) scale(0.38)">
+
+    <defs>
+      <linearGradient id="platinum_base_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#53606B"/>
+        <stop offset="0.18" stop-color="#DCE9F3"/>
+        <stop offset="0.36" stop-color="#FFFFFF"/>
+        <stop offset="0.52" stop-color="#7E8B98"/>
+        <stop offset="0.70" stop-color="#FFFFFF"/>
+        <stop offset="1" stop-color="#53606B"/>
+      </linearGradient>
+      <linearGradient id="platinum_base_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.28" stop-color="#DCE9F3"/>
+        <stop offset="0.70" stop-color="#7E8B98"/>
+        <stop offset="1" stop-color="#53606B"/>
+      </linearGradient>
+      <radialGradient id="platinum_base_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#8FE8FF"/>
+        <stop offset="0.62" stop-color="#DCE9F3"/>
+        <stop offset="1" stop-color="#53606B"/>
+      </radialGradient>
+      <radialGradient id="platinum_base_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#DCE9F3" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#DCE9F3" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="platinum_base_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="platinum_base_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+    </defs>
+    
+
+      <g id="crown" filter="url(#platinum_base_shadow)">
+        <path d="M98 306 L90 202 L130 204 L164 142 L192 176 L220 124 L240 82 L256 58 L272 82 L292 124 L320 176 L348 142 L382 204 L422 202 L414 306 Q336 288 256 296 Q176 288 98 306 Z" fill="url(#platinum_base_metal)" stroke="#53606B" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M146 280 C176 264 206 272 232 286 C242 294 270 294 280 286 C306 272 336 264 366 280" fill="none" stroke="#FFFFFF" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M110 306 C154 314 202 320 256 320 C310 320 358 314 402 306 L394 332 H118 Z" fill="url(#platinum_base_base)" stroke="#53606B" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M142 322 C178 328 216 332 256 332 C296 332 334 328 370 322" fill="none" stroke="#FFFFFF" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+<path d="M146 204 Q172 166 192 132" stroke-width="4" />
+<path d="M366 204 Q340 166 320 132" stroke-width="4" />
+<path d="M220 124 L240 84 L256 104 L272 84 L292 124" stroke-width="4" />
+<path d="M192 176 Q222 156 256 156 Q290 156 320 176" stroke-width="4" />
+<path d="M240 82 Q248 72 256 72 Q264 72 272 82" stroke-width="4" />
+</g>
+<path d="M90 195 L97 202 L90 209 L83 202 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M164 135 L171 142 L164 149 L157 142 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M192 170 L198 176 L192 182 L186 176 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M240 76 L246 82 L240 88 L234 82 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M256 48 L266 58 L256 68 L246 58 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M272 76 L278 82 L272 88 L266 82 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M320 170 L326 176 L320 182 L314 176 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M348 135 L355 142 L348 149 L341 142 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M422 195 L429 202 L422 209 L415 202 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<circle cx="130" cy="204" r="9" fill="url(#platinum_base_gem)" stroke="#53606B" stroke-width="4.8"/>
+<circle cx="382" cy="204" r="9" fill="url(#platinum_base_gem)" stroke="#53606B" stroke-width="4.8"/>
+<path d="M256 236 L294 278 L256 332 L218 278 Z" fill="url(#platinum_base_gem)" stroke="#53606B" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 256 L274 278 L256 312 L238 278 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+<g>
+    <g transform="translate(256 58)" filter="url(#platinum_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="7.2s" begin="4.2s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="7.2s" begin="4.2s" repeatCount="indefinite"/>
+      <path d="M0 -58 C3.8 -25.5 3.8 -11.6 0 0
+               C-3.8 -11.6 -3.8 -25.5 0 -58
+               M38 0 C16.7 5.8 7.6 5.8 0 0
+               C7.6 -5.8 16.7 -5.8 38 0
+               M0 58 C-3.8 25.5 -3.8 11.6 0 0
+               C3.8 11.6 3.8 25.5 0 58
+               M-38 0 C-16.7 -5.8 -7.6 -5.8 0 0
+               C-7.6 5.8 -16.7 5.8 -38 0"
+            fill="url(#platinum_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="6.5" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(256 236)" filter="url(#platinum_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <path d="M0 -68 C4.4 -29.9 4.4 -13.6 0 0
+               C-4.4 -13.6 -4.4 -29.9 0 -68
+               M44 0 C19.4 6.8 8.8 6.8 0 0
+               C8.8 -6.8 19.4 -6.8 44 0
+               M0 68 C-4.4 29.9 -4.4 13.6 0 0
+               C4.4 13.6 4.4 29.9 0 68
+               M-44 0 C-19.4 -6.8 -8.8 -6.8 0 0
+               C-8.8 6.8 -19.4 6.8 -44 0"
+            fill="url(#platinum_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="7.5" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(130 204)" filter="url(#platinum_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#platinum_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(382 204)" filter="url(#platinum_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#platinum_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    </g>
+</g>
+<text x="1120" y="435" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">铂金</text>
+<text x="1120" y="458" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">PLATINUM</text>
+<rect x="1298" y="117" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(1342,123) scale(0.38)">
+
+    <defs>
+      <linearGradient id="amethyst_base_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#250B3B"/>
+        <stop offset="0.18" stop-color="#8D43C7"/>
+        <stop offset="0.36" stop-color="#E6BCFF"/>
+        <stop offset="0.52" stop-color="#4A176D"/>
+        <stop offset="0.70" stop-color="#E6BCFF"/>
+        <stop offset="1" stop-color="#250B3B"/>
+      </linearGradient>
+      <linearGradient id="amethyst_base_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#E6BCFF"/>
+        <stop offset="0.28" stop-color="#8D43C7"/>
+        <stop offset="0.70" stop-color="#4A176D"/>
+        <stop offset="1" stop-color="#250B3B"/>
+      </linearGradient>
+      <radialGradient id="amethyst_base_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#C56DFF"/>
+        <stop offset="0.62" stop-color="#8D43C7"/>
+        <stop offset="1" stop-color="#250B3B"/>
+      </radialGradient>
+      <radialGradient id="amethyst_base_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#E6BCFF" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#8D43C7" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#8D43C7" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="amethyst_base_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="amethyst_base_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+    </defs>
+    
+
+      <g id="crown" filter="url(#amethyst_base_shadow)">
+        <path d="M88 300 L80 188 L118 188 L152 136 L182 172 L212 118 L236 74 L256 44 L276 74 L300 118 L330 172 L360 136 L394 188 L432 188 L424 300 Q342 282 256 290 Q170 282 88 300 Z" fill="url(#amethyst_base_metal)" stroke="#250B3B" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M142 274 C174 256 208 266 236 284 C246 292 266 292 276 284 C304 266 338 256 370 274" fill="none" stroke="#E6BCFF" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M102 300 C148 308 200 316 256 316 C312 316 364 308 410 300 L400 328 H112 Z" fill="url(#amethyst_base_base)" stroke="#250B3B" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M136 318 C174 326 214 332 256 332 C298 332 338 326 376 318" fill="none" stroke="#E6BCFF" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#E6BCFF" stroke-linecap="round" stroke-linejoin="round">
+<path d="M130 188 Q156 150 180 112" stroke-width="4" />
+<path d="M382 188 Q356 150 332 112" stroke-width="4" />
+<path d="M212 118 L236 76 L256 98 L276 76 L300 118" stroke-width="4" />
+<path d="M182 172 Q216 148 256 148 Q296 148 330 172" stroke-width="4" />
+<path d="M236 74 Q246 60 256 60 Q266 60 276 74" stroke-width="4" />
+</g>
+<path d="M80 181 L87 188 L80 195 L73 188 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M152 129 L159 136 L152 143 L145 136 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M182 166 L188 172 L182 178 L176 172 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M236 68 L242 74 L236 80 L230 74 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M256 33 L267 44 L256 55 L245 44 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M276 68 L282 74 L276 80 L270 74 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M330 166 L336 172 L330 178 L324 172 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M360 129 L367 136 L360 143 L353 136 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M432 181 L439 188 L432 195 L425 188 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<circle cx="118" cy="188" r="9" fill="url(#amethyst_base_gem)" stroke="#250B3B" stroke-width="4.8"/>
+<circle cx="394" cy="188" r="9" fill="url(#amethyst_base_gem)" stroke="#250B3B" stroke-width="4.8"/>
+<path d="M256 222 L298 270 L256 334 L214 270 Z" fill="url(#amethyst_base_gem)" stroke="#250B3B" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 246 L276 270 L256 308 L236 270 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+<g>
+    <g transform="translate(256 44)" filter="url(#amethyst_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="7.2s" begin="4.3s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="7.2s" begin="4.3s" repeatCount="indefinite"/>
+      <path d="M0 -60 C4.0 -26.4 4.0 -12.0 0 0
+               C-4.0 -12.0 -4.0 -26.4 0 -60
+               M40 0 C17.6 6.0 8.0 6.0 0 0
+               C8.0 -6.0 17.6 -6.0 40 0
+               M0 60 C-4.0 26.4 -4.0 12.0 0 0
+               C4.0 12.0 4.0 26.4 0 60
+               M-40 0 C-17.6 -6.0 -8.0 -6.0 0 0
+               C-8.0 6.0 -17.6 6.0 -40 0"
+            fill="url(#amethyst_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="6.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(256 222)" filter="url(#amethyst_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <path d="M0 -72 C4.6 -31.7 4.6 -14.4 0 0
+               C-4.6 -14.4 -4.6 -31.7 0 -72
+               M46 0 C20.2 7.2 9.2 7.2 0 0
+               C9.2 -7.2 20.2 -7.2 46 0
+               M0 72 C-4.6 31.7 -4.6 14.4 0 0
+               C4.6 14.4 4.6 31.7 0 72
+               M-46 0 C-20.2 -7.2 -9.2 -7.2 0 0
+               C-9.2 7.2 -20.2 7.2 -46 0"
+            fill="url(#amethyst_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="7.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(118 188)" filter="url(#amethyst_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#amethyst_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(394 188)" filter="url(#amethyst_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#amethyst_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    </g>
+</g>
+<text x="1440" y="435" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">紫水晶</text>
+<text x="1440" y="458" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">AMETHYST</text>
+<rect x="18" y="507" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(62,513) scale(0.38)">
+
+    <defs>
+      <linearGradient id="bronze_magic_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#3A1B12"/>
+        <stop offset="0.18" stop-color="#B86A3F"/>
+        <stop offset="0.36" stop-color="#E0A06C"/>
+        <stop offset="0.52" stop-color="#6B351D"/>
+        <stop offset="0.70" stop-color="#E0A06C"/>
+        <stop offset="1" stop-color="#3A1B12"/>
+      </linearGradient>
+      <linearGradient id="bronze_magic_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#E0A06C"/>
+        <stop offset="0.28" stop-color="#B86A3F"/>
+        <stop offset="0.70" stop-color="#6B351D"/>
+        <stop offset="1" stop-color="#3A1B12"/>
+      </linearGradient>
+      <radialGradient id="bronze_magic_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#E58A52"/>
+        <stop offset="0.62" stop-color="#B86A3F"/>
+        <stop offset="1" stop-color="#3A1B12"/>
+      </radialGradient>
+      <radialGradient id="bronze_magic_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#E0A06C" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#B86A3F" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#B86A3F" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="bronze_magic_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="bronze_magic_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+        <linearGradient id="bronze_magic_sweep" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C58EFF" stop-opacity="0"/>
+          <stop offset="0.18" stop-color="#D8A9FF" stop-opacity="0.18"/>
+          <stop offset="0.42" stop-color="#96F1FF" stop-opacity="0.82"/>
+          <stop offset="0.58" stop-color="#FFFFFF" stop-opacity="0.95"/>
+          <stop offset="0.76" stop-color="#CFA0FF" stop-opacity="0.36"/>
+          <stop offset="1" stop-color="#C58EFF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="bronze_magic_sweepSoft" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.25" stop-color="#D7A5FF" stop-opacity="0.24"/>
+          <stop offset="0.5" stop-color="#8EF2FF" stop-opacity="0.48"/>
+          <stop offset="0.75" stop-color="#D19CFF" stop-opacity="0.24"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="bronze_magic_ribbon" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C089FF" stop-opacity="0"/>
+          <stop offset="0.20" stop-color="#DAA5FF" stop-opacity="0.62"/>
+          <stop offset="0.50" stop-color="#90F0FF" stop-opacity="1"/>
+          <stop offset="0.80" stop-color="#D79EFF" stop-opacity="0.62"/>
+          <stop offset="1" stop-color="#C089FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="bronze_magic_ribbon2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.28" stop-color="#D4A0FF" stop-opacity="0.54"/>
+          <stop offset="0.54" stop-color="#78F4FF" stop-opacity="0.92"/>
+          <stop offset="0.78" stop-color="#D4A0FF" stop-opacity="0.52"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="bronze_magic_magicGlow" x="-70%" y="-70%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="9" result="blur"/>
+          <feColorMatrix in="blur" type="matrix"
+            values="0.80 0 0 0 0.16
+                    0 0.68 0 0 0.14
+                    0 0 1 0 0.42
+                    0 0 0 0.96 0" result="tint"/>
+          <feMerge><feMergeNode in="tint"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="bronze_magic_clip"><path d="M132 320 L126 238 L172 246 L200 198 L228 218 L256 180 L284 218 L312 198 L340 246 L386 238 L380 320 Q320 308 256 312 Q192 308 132 320 Z"/><path d="M142 320 C178 324 216 328 256 328 C296 328 334 324 370 320 L366 348 H146 Z"/></clipPath>
+        
+    </defs>
+    
+
+      <g id="crown" filter="url(#bronze_magic_shadow)">
+        <path d="M132 320 L126 238 L172 246 L200 198 L228 218 L256 180 L284 218 L312 198 L340 246 L386 238 L380 320 Q320 308 256 312 Q192 308 132 320 Z" fill="url(#bronze_magic_metal)" stroke="#3A1B12" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M162 294 C186 288 208 290 228 294 C240 298 272 298 284 294 C304 290 326 288 350 294" fill="none" stroke="#E0A06C" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M142 320 C178 324 216 328 256 328 C296 328 334 324 370 320 L366 348 H146 Z" fill="url(#bronze_magic_base)" stroke="#3A1B12" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M164 334 C194 338 224 340 256 340 C288 340 318 338 348 334" fill="none" stroke="#E0A06C" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#E0A06C" stroke-linecap="round" stroke-linejoin="round">
+<path d="M184 252 Q198 234 210 220" stroke-width="4" />
+<path d="M328 252 Q314 234 302 220" stroke-width="4" />
+</g>
+<circle cx="126" cy="238" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="200" cy="198" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="256" cy="180" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="312" cy="198" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="386" cy="238" r="7" fill="#E0A06C" stroke="#3A1B12" stroke-width="4.1"/>
+<circle cx="172" cy="246" r="9" fill="url(#bronze_magic_gem)" stroke="#3A1B12" stroke-width="4.8"/>
+<circle cx="340" cy="246" r="9" fill="url(#bronze_magic_gem)" stroke="#3A1B12" stroke-width="4.8"/>
+<path d="M256 276 L276 296 L256 318 L236 296 Z" fill="url(#bronze_magic_gem)" stroke="#3A1B12" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 284 L266 296 L256 308 L246 296 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+
+    <g clip-path="url(#bronze_magic_clip)" pointer-events="none">
+      <g filter="url(#bronze_magic_magicGlow)">
+        <g transform="rotate(-16 256 256)">
+          <rect x="-420" y="-80" width="160" height="720" rx="80" fill="url(#bronze_magic_sweep)" opacity="0.95">
+            <animate attributeName="x" values="-420;-420;560" dur="6.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="-640" y="-100" width="100" height="760" rx="50" fill="url(#bronze_magic_sweepSoft)" opacity="0.68">
+            <animate attributeName="x" values="-640;-640;520" dur="7.8s" begin="1.3s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+      </g>
+      <g stroke-linecap="round" fill="none">
+        <path d="M38 188 C106 166 178 172 256 194 C334 216 400 220 472 192" stroke="url(#bronze_magic_ribbon)" stroke-width="7" opacity="0.90">
+          <animateTransform attributeName="transform" type="translate" values="-12 0;-12 0;16 0;-12 0" dur="6.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.30;0.30;1;0.65;0.30" dur="6.2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M24 296 C92 270 170 276 256 304 C344 332 412 334 488 300" stroke="url(#bronze_magic_ribbon)" stroke-width="8.8" opacity="0.88">
+          <animateTransform attributeName="transform" type="translate" values="16 0;16 0;-12 0;16 0" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.32;0.32;1;0.68;0.32" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+        </path>
+      </g>
+    </g>
+    
+</g>
+<text x="160" y="825" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">魔法青铜</text>
+<text x="160" y="848" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">MAGIC · BRONZE</text>
+<rect x="338" y="507" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(382,513) scale(0.38)">
+
+    <defs>
+      <linearGradient id="silver_magic_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#41464D"/>
+        <stop offset="0.18" stop-color="#C7CED6"/>
+        <stop offset="0.36" stop-color="#F4F7FA"/>
+        <stop offset="0.52" stop-color="#70757C"/>
+        <stop offset="0.70" stop-color="#F4F7FA"/>
+        <stop offset="1" stop-color="#41464D"/>
+      </linearGradient>
+      <linearGradient id="silver_magic_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F4F7FA"/>
+        <stop offset="0.28" stop-color="#C7CED6"/>
+        <stop offset="0.70" stop-color="#70757C"/>
+        <stop offset="1" stop-color="#41464D"/>
+      </linearGradient>
+      <radialGradient id="silver_magic_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#B7E3FF"/>
+        <stop offset="0.62" stop-color="#C7CED6"/>
+        <stop offset="1" stop-color="#41464D"/>
+      </radialGradient>
+      <radialGradient id="silver_magic_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#F4F7FA" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#C7CED6" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#C7CED6" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="silver_magic_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="silver_magic_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+        <linearGradient id="silver_magic_sweep" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C58EFF" stop-opacity="0"/>
+          <stop offset="0.18" stop-color="#D8A9FF" stop-opacity="0.18"/>
+          <stop offset="0.42" stop-color="#96F1FF" stop-opacity="0.82"/>
+          <stop offset="0.58" stop-color="#FFFFFF" stop-opacity="0.95"/>
+          <stop offset="0.76" stop-color="#CFA0FF" stop-opacity="0.36"/>
+          <stop offset="1" stop-color="#C58EFF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="silver_magic_sweepSoft" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.25" stop-color="#D7A5FF" stop-opacity="0.24"/>
+          <stop offset="0.5" stop-color="#8EF2FF" stop-opacity="0.48"/>
+          <stop offset="0.75" stop-color="#D19CFF" stop-opacity="0.24"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="silver_magic_ribbon" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C089FF" stop-opacity="0"/>
+          <stop offset="0.20" stop-color="#DAA5FF" stop-opacity="0.62"/>
+          <stop offset="0.50" stop-color="#90F0FF" stop-opacity="1"/>
+          <stop offset="0.80" stop-color="#D79EFF" stop-opacity="0.62"/>
+          <stop offset="1" stop-color="#C089FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="silver_magic_ribbon2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.28" stop-color="#D4A0FF" stop-opacity="0.54"/>
+          <stop offset="0.54" stop-color="#78F4FF" stop-opacity="0.92"/>
+          <stop offset="0.78" stop-color="#D4A0FF" stop-opacity="0.52"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="silver_magic_magicGlow" x="-70%" y="-70%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="9" result="blur"/>
+          <feColorMatrix in="blur" type="matrix"
+            values="0.80 0 0 0 0.16
+                    0 0.68 0 0 0.14
+                    0 0 1 0 0.42
+                    0 0 0 0.96 0" result="tint"/>
+          <feMerge><feMergeNode in="tint"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="silver_magic_clip"><path d="M122 320 L116 228 L162 236 L192 180 L220 210 L256 150 L292 210 L320 180 L350 236 L396 228 L390 320 Q324 306 256 310 Q188 306 122 320 Z"/><path d="M132 320 C170 326 212 332 256 332 C300 332 342 326 380 320 L374 350 H138 Z"/></clipPath>
+        
+    </defs>
+    
+
+      <g id="crown" filter="url(#silver_magic_shadow)">
+        <path d="M122 320 L116 228 L162 236 L192 180 L220 210 L256 150 L292 210 L320 180 L350 236 L396 228 L390 320 Q324 306 256 310 Q188 306 122 320 Z" fill="url(#silver_magic_metal)" stroke="#41464D" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M158 292 C184 282 208 286 228 294 C240 300 272 300 284 294 C304 286 328 282 354 292" fill="none" stroke="#F4F7FA" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M132 320 C170 326 212 332 256 332 C300 332 342 326 380 320 L374 350 H138 Z" fill="url(#silver_magic_base)" stroke="#41464D" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M158 336 C190 342 222 344 256 344 C290 344 322 342 354 336" fill="none" stroke="#F4F7FA" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#F4F7FA" stroke-linecap="round" stroke-linejoin="round">
+<path d="M178 244 Q194 218 206 192" stroke-width="4" />
+<path d="M334 244 Q318 218 306 192" stroke-width="4" />
+<path d="M232 214 Q244 200 256 200 Q268 200 280 214" stroke-width="4" />
+</g>
+<circle cx="116" cy="228" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="192" cy="180" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="220" cy="210" r="6" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="256" cy="150" r="8" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="292" cy="210" r="6" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="320" cy="180" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="396" cy="228" r="7" fill="#F4F7FA" stroke="#41464D" stroke-width="4.1"/>
+<circle cx="162" cy="236" r="9" fill="url(#silver_magic_gem)" stroke="#41464D" stroke-width="4.8"/>
+<circle cx="350" cy="236" r="9" fill="url(#silver_magic_gem)" stroke="#41464D" stroke-width="4.8"/>
+<path d="M256 268 L280 296 L256 324 L232 296 Z" fill="url(#silver_magic_gem)" stroke="#41464D" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 278 L268 296 L256 314 L244 296 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+
+    <g clip-path="url(#silver_magic_clip)" pointer-events="none">
+      <g filter="url(#silver_magic_magicGlow)">
+        <g transform="rotate(-16 256 256)">
+          <rect x="-420" y="-80" width="160" height="720" rx="80" fill="url(#silver_magic_sweep)" opacity="0.95">
+            <animate attributeName="x" values="-420;-420;560" dur="6.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="-640" y="-100" width="100" height="760" rx="50" fill="url(#silver_magic_sweepSoft)" opacity="0.68">
+            <animate attributeName="x" values="-640;-640;520" dur="7.8s" begin="1.3s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+      </g>
+      <g stroke-linecap="round" fill="none">
+        <path d="M38 188 C106 166 178 172 256 194 C334 216 400 220 472 192" stroke="url(#silver_magic_ribbon)" stroke-width="7" opacity="0.90">
+          <animateTransform attributeName="transform" type="translate" values="-12 0;-12 0;16 0;-12 0" dur="6.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.30;0.30;1;0.65;0.30" dur="6.2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M24 296 C92 270 170 276 256 304 C344 332 412 334 488 300" stroke="url(#silver_magic_ribbon)" stroke-width="8.8" opacity="0.88">
+          <animateTransform attributeName="transform" type="translate" values="16 0;16 0;-12 0;16 0" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.32;0.32;1;0.68;0.32" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+        </path>
+      </g>
+    </g>
+    
+</g>
+<text x="480" y="825" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">魔法白银</text>
+<text x="480" y="848" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">MAGIC · SILVER</text>
+<rect x="658" y="507" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(702,513) scale(0.38)">
+
+    <defs>
+      <linearGradient id="gold_magic_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#5A3200"/>
+        <stop offset="0.18" stop-color="#F0B52C"/>
+        <stop offset="0.36" stop-color="#FFF1A6"/>
+        <stop offset="0.52" stop-color="#9A5A00"/>
+        <stop offset="0.70" stop-color="#FFF1A6"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </linearGradient>
+      <linearGradient id="gold_magic_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFF1A6"/>
+        <stop offset="0.28" stop-color="#F0B52C"/>
+        <stop offset="0.70" stop-color="#9A5A00"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </linearGradient>
+      <radialGradient id="gold_magic_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#FFD45C"/>
+        <stop offset="0.62" stop-color="#F0B52C"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </radialGradient>
+      <radialGradient id="gold_magic_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#FFF1A6" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#F0B52C" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#F0B52C" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="gold_magic_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="gold_magic_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+        <linearGradient id="gold_magic_sweep" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C58EFF" stop-opacity="0"/>
+          <stop offset="0.18" stop-color="#D8A9FF" stop-opacity="0.18"/>
+          <stop offset="0.42" stop-color="#96F1FF" stop-opacity="0.82"/>
+          <stop offset="0.58" stop-color="#FFFFFF" stop-opacity="0.95"/>
+          <stop offset="0.76" stop-color="#CFA0FF" stop-opacity="0.36"/>
+          <stop offset="1" stop-color="#C58EFF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gold_magic_sweepSoft" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.25" stop-color="#D7A5FF" stop-opacity="0.24"/>
+          <stop offset="0.5" stop-color="#8EF2FF" stop-opacity="0.48"/>
+          <stop offset="0.75" stop-color="#D19CFF" stop-opacity="0.24"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gold_magic_ribbon" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C089FF" stop-opacity="0"/>
+          <stop offset="0.20" stop-color="#DAA5FF" stop-opacity="0.62"/>
+          <stop offset="0.50" stop-color="#90F0FF" stop-opacity="1"/>
+          <stop offset="0.80" stop-color="#D79EFF" stop-opacity="0.62"/>
+          <stop offset="1" stop-color="#C089FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gold_magic_ribbon2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.28" stop-color="#D4A0FF" stop-opacity="0.54"/>
+          <stop offset="0.54" stop-color="#78F4FF" stop-opacity="0.92"/>
+          <stop offset="0.78" stop-color="#D4A0FF" stop-opacity="0.52"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="gold_magic_magicGlow" x="-70%" y="-70%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="9" result="blur"/>
+          <feColorMatrix in="blur" type="matrix"
+            values="0.80 0 0 0 0.16
+                    0 0.68 0 0 0.14
+                    0 0 1 0 0.42
+                    0 0 0 0.96 0" result="tint"/>
+          <feMerge><feMergeNode in="tint"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="gold_magic_clip"><path d="M108 318 L100 218 L144 222 L176 166 L204 196 L228 146 L246 114 L256 96 L266 114 L284 146 L308 196 L336 166 L368 222 L412 218 L404 318 Q330 302 256 308 Q182 302 108 318 Z"/><path d="M120 318 C162 326 208 332 256 332 C304 332 350 326 392 318 L384 350 H128 Z"/></clipPath>
+        
+    </defs>
+    
+
+      <g id="crown" filter="url(#gold_magic_shadow)">
+        <path d="M108 318 L100 218 L144 222 L176 166 L204 196 L228 146 L246 114 L256 96 L266 114 L284 146 L308 196 L336 166 L368 222 L412 218 L404 318 Q330 302 256 308 Q182 302 108 318 Z" fill="url(#gold_magic_metal)" stroke="#5A3200" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M150 290 C178 278 206 284 230 294 C242 300 270 300 282 294 C306 284 334 278 362 290" fill="none" stroke="#FFF1A6" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M120 318 C162 326 208 332 256 332 C304 332 350 326 392 318 L384 350 H128 Z" fill="url(#gold_magic_base)" stroke="#5A3200" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M148 336 C182 342 218 346 256 346 C294 346 330 342 364 336" fill="none" stroke="#FFF1A6" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#FFF1A6" stroke-linecap="round" stroke-linejoin="round">
+<path d="M160 226 Q182 192 200 158" stroke-width="4" />
+<path d="M352 226 Q330 192 312 158" stroke-width="4" />
+<path d="M228 146 L246 118 L256 132 L266 118 L284 146" stroke-width="4" />
+<path d="M204 196 Q228 182 256 182 Q284 182 308 196" stroke-width="4" />
+</g>
+<path d="M100 211 L107 218 L100 225 L93 218 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M176 159 L183 166 L176 173 L169 166 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M204 190 L210 196 L204 202 L198 196 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M256 87 L265 96 L256 105 L247 96 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M308 190 L314 196 L308 202 L302 196 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M336 159 L343 166 L336 173 L329 166 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M412 211 L419 218 L412 225 L405 218 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<circle cx="144" cy="222" r="9" fill="url(#gold_magic_gem)" stroke="#5A3200" stroke-width="4.8"/>
+<circle cx="368" cy="222" r="9" fill="url(#gold_magic_gem)" stroke="#5A3200" stroke-width="4.8"/>
+<path d="M256 256 L286 290 L256 330 L226 290 Z" fill="url(#gold_magic_gem)" stroke="#5A3200" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 270 L272 290 L256 312 L240 290 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+
+    <g clip-path="url(#gold_magic_clip)" pointer-events="none">
+      <g filter="url(#gold_magic_magicGlow)">
+        <g transform="rotate(-16 256 256)">
+          <rect x="-420" y="-80" width="160" height="720" rx="80" fill="url(#gold_magic_sweep)" opacity="0.95">
+            <animate attributeName="x" values="-420;-420;560" dur="6.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="-640" y="-100" width="100" height="760" rx="50" fill="url(#gold_magic_sweepSoft)" opacity="0.68">
+            <animate attributeName="x" values="-640;-640;520" dur="7.8s" begin="1.3s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+      </g>
+      <g stroke-linecap="round" fill="none">
+        <path d="M38 188 C106 166 178 172 256 194 C334 216 400 220 472 192" stroke="url(#gold_magic_ribbon)" stroke-width="7" opacity="0.90">
+          <animateTransform attributeName="transform" type="translate" values="-12 0;-12 0;16 0;-12 0" dur="6.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.30;0.30;1;0.65;0.30" dur="6.2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M24 296 C92 270 170 276 256 304 C344 332 412 334 488 300" stroke="url(#gold_magic_ribbon)" stroke-width="8.8" opacity="0.88">
+          <animateTransform attributeName="transform" type="translate" values="16 0;16 0;-12 0;16 0" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.32;0.32;1;0.68;0.32" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+        </path>
+      </g>
+    </g>
+    
+<g>
+    <g transform="translate(256 96)" filter="url(#gold_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="7.0s" begin="4.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="7.0s" begin="4.0s" repeatCount="indefinite"/>
+      <path d="M0 -52 C3.4 -22.9 3.4 -10.4 0 0
+               C-3.4 -10.4 -3.4 -22.9 0 -52
+               M34 0 C15.0 5.2 6.8 5.2 0 0
+               C6.8 -5.2 15.0 -5.2 34 0
+               M0 52 C-3.4 22.9 -3.4 10.4 0 0
+               C3.4 10.4 3.4 22.9 0 52
+               M-34 0 C-15.0 -5.2 -6.8 -5.2 0 0
+               C-6.8 5.2 -15.0 5.2 -34 0"
+            fill="url(#gold_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="5.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(256 256)" filter="url(#gold_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <path d="M0 -66 C4.2 -29.0 4.2 -13.2 0 0
+               C-4.2 -13.2 -4.2 -29.0 0 -66
+               M42 0 C18.5 6.6 8.4 6.6 0 0
+               C8.4 -6.6 18.5 -6.6 42 0
+               M0 66 C-4.2 29.0 -4.2 13.2 0 0
+               C4.2 13.2 4.2 29.0 0 66
+               M-42 0 C-18.5 -6.6 -8.4 -6.6 0 0
+               C-8.4 6.6 -18.5 6.6 -42 0"
+            fill="url(#gold_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="7.1" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(144 222)" filter="url(#gold_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#gold_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(368 222)" filter="url(#gold_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#gold_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    </g>
+</g>
+<text x="800" y="825" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">魔法黄金</text>
+<text x="800" y="848" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">MAGIC · GOLD</text>
+<rect x="978" y="507" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(1022,513) scale(0.38)">
+
+    <defs>
+      <linearGradient id="platinum_magic_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#53606B"/>
+        <stop offset="0.18" stop-color="#DCE9F3"/>
+        <stop offset="0.36" stop-color="#FFFFFF"/>
+        <stop offset="0.52" stop-color="#7E8B98"/>
+        <stop offset="0.70" stop-color="#FFFFFF"/>
+        <stop offset="1" stop-color="#53606B"/>
+      </linearGradient>
+      <linearGradient id="platinum_magic_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.28" stop-color="#DCE9F3"/>
+        <stop offset="0.70" stop-color="#7E8B98"/>
+        <stop offset="1" stop-color="#53606B"/>
+      </linearGradient>
+      <radialGradient id="platinum_magic_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#8FE8FF"/>
+        <stop offset="0.62" stop-color="#DCE9F3"/>
+        <stop offset="1" stop-color="#53606B"/>
+      </radialGradient>
+      <radialGradient id="platinum_magic_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#DCE9F3" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#DCE9F3" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="platinum_magic_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="platinum_magic_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+        <linearGradient id="platinum_magic_sweep" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C58EFF" stop-opacity="0"/>
+          <stop offset="0.18" stop-color="#D8A9FF" stop-opacity="0.18"/>
+          <stop offset="0.42" stop-color="#96F1FF" stop-opacity="0.82"/>
+          <stop offset="0.58" stop-color="#FFFFFF" stop-opacity="0.95"/>
+          <stop offset="0.76" stop-color="#CFA0FF" stop-opacity="0.36"/>
+          <stop offset="1" stop-color="#C58EFF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="platinum_magic_sweepSoft" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.25" stop-color="#D7A5FF" stop-opacity="0.24"/>
+          <stop offset="0.5" stop-color="#8EF2FF" stop-opacity="0.48"/>
+          <stop offset="0.75" stop-color="#D19CFF" stop-opacity="0.24"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="platinum_magic_ribbon" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C089FF" stop-opacity="0"/>
+          <stop offset="0.20" stop-color="#DAA5FF" stop-opacity="0.62"/>
+          <stop offset="0.50" stop-color="#90F0FF" stop-opacity="1"/>
+          <stop offset="0.80" stop-color="#D79EFF" stop-opacity="0.62"/>
+          <stop offset="1" stop-color="#C089FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="platinum_magic_ribbon2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.28" stop-color="#D4A0FF" stop-opacity="0.54"/>
+          <stop offset="0.54" stop-color="#78F4FF" stop-opacity="0.92"/>
+          <stop offset="0.78" stop-color="#D4A0FF" stop-opacity="0.52"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="platinum_magic_magicGlow" x="-70%" y="-70%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="9" result="blur"/>
+          <feColorMatrix in="blur" type="matrix"
+            values="0.80 0 0 0 0.16
+                    0 0.68 0 0 0.14
+                    0 0 1 0 0.42
+                    0 0 0 0.96 0" result="tint"/>
+          <feMerge><feMergeNode in="tint"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="platinum_magic_clip"><path d="M98 306 L90 202 L130 204 L164 142 L192 176 L220 124 L240 82 L256 58 L272 82 L292 124 L320 176 L348 142 L382 204 L422 202 L414 306 Q336 288 256 296 Q176 288 98 306 Z"/><path d="M110 306 C154 314 202 320 256 320 C310 320 358 314 402 306 L394 332 H118 Z"/></clipPath>
+        
+    </defs>
+    
+
+      <g id="crown" filter="url(#platinum_magic_shadow)">
+        <path d="M98 306 L90 202 L130 204 L164 142 L192 176 L220 124 L240 82 L256 58 L272 82 L292 124 L320 176 L348 142 L382 204 L422 202 L414 306 Q336 288 256 296 Q176 288 98 306 Z" fill="url(#platinum_magic_metal)" stroke="#53606B" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M146 280 C176 264 206 272 232 286 C242 294 270 294 280 286 C306 272 336 264 366 280" fill="none" stroke="#FFFFFF" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M110 306 C154 314 202 320 256 320 C310 320 358 314 402 306 L394 332 H118 Z" fill="url(#platinum_magic_base)" stroke="#53606B" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M142 322 C178 328 216 332 256 332 C296 332 334 328 370 322" fill="none" stroke="#FFFFFF" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+<path d="M146 204 Q172 166 192 132" stroke-width="4" />
+<path d="M366 204 Q340 166 320 132" stroke-width="4" />
+<path d="M220 124 L240 84 L256 104 L272 84 L292 124" stroke-width="4" />
+<path d="M192 176 Q222 156 256 156 Q290 156 320 176" stroke-width="4" />
+<path d="M240 82 Q248 72 256 72 Q264 72 272 82" stroke-width="4" />
+</g>
+<path d="M90 195 L97 202 L90 209 L83 202 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M164 135 L171 142 L164 149 L157 142 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M192 170 L198 176 L192 182 L186 176 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M240 76 L246 82 L240 88 L234 82 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M256 48 L266 58 L256 68 L246 58 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M272 76 L278 82 L272 88 L266 82 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M320 170 L326 176 L320 182 L314 176 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M348 135 L355 142 L348 149 L341 142 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M422 195 L429 202 L422 209 L415 202 Z" fill="#FFFFFF" stroke="#53606B" stroke-width="4.1" stroke-linejoin="round"/>
+<circle cx="130" cy="204" r="9" fill="url(#platinum_magic_gem)" stroke="#53606B" stroke-width="4.8"/>
+<circle cx="382" cy="204" r="9" fill="url(#platinum_magic_gem)" stroke="#53606B" stroke-width="4.8"/>
+<path d="M256 236 L294 278 L256 332 L218 278 Z" fill="url(#platinum_magic_gem)" stroke="#53606B" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 256 L274 278 L256 312 L238 278 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+
+    <g clip-path="url(#platinum_magic_clip)" pointer-events="none">
+      <g filter="url(#platinum_magic_magicGlow)">
+        <g transform="rotate(-16 256 256)">
+          <rect x="-420" y="-80" width="160" height="720" rx="80" fill="url(#platinum_magic_sweep)" opacity="0.95">
+            <animate attributeName="x" values="-420;-420;560" dur="6.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="-640" y="-100" width="100" height="760" rx="50" fill="url(#platinum_magic_sweepSoft)" opacity="0.68">
+            <animate attributeName="x" values="-640;-640;520" dur="7.8s" begin="1.3s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+      </g>
+      <g stroke-linecap="round" fill="none">
+        <path d="M38 188 C106 166 178 172 256 194 C334 216 400 220 472 192" stroke="url(#platinum_magic_ribbon)" stroke-width="7" opacity="0.90">
+          <animateTransform attributeName="transform" type="translate" values="-12 0;-12 0;16 0;-12 0" dur="6.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.30;0.30;1;0.65;0.30" dur="6.2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M24 296 C92 270 170 276 256 304 C344 332 412 334 488 300" stroke="url(#platinum_magic_ribbon)" stroke-width="8.8" opacity="0.88">
+          <animateTransform attributeName="transform" type="translate" values="16 0;16 0;-12 0;16 0" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.32;0.32;1;0.68;0.32" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+        </path>
+      </g>
+    </g>
+    
+<g>
+    <g transform="translate(256 58)" filter="url(#platinum_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="7.2s" begin="4.2s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="7.2s" begin="4.2s" repeatCount="indefinite"/>
+      <path d="M0 -58 C3.8 -25.5 3.8 -11.6 0 0
+               C-3.8 -11.6 -3.8 -25.5 0 -58
+               M38 0 C16.7 5.8 7.6 5.8 0 0
+               C7.6 -5.8 16.7 -5.8 38 0
+               M0 58 C-3.8 25.5 -3.8 11.6 0 0
+               C3.8 11.6 3.8 25.5 0 58
+               M-38 0 C-16.7 -5.8 -7.6 -5.8 0 0
+               C-7.6 5.8 -16.7 5.8 -38 0"
+            fill="url(#platinum_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="6.5" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(256 236)" filter="url(#platinum_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <path d="M0 -68 C4.4 -29.9 4.4 -13.6 0 0
+               C-4.4 -13.6 -4.4 -29.9 0 -68
+               M44 0 C19.4 6.8 8.8 6.8 0 0
+               C8.8 -6.8 19.4 -6.8 44 0
+               M0 68 C-4.4 29.9 -4.4 13.6 0 0
+               C4.4 13.6 4.4 29.9 0 68
+               M-44 0 C-19.4 -6.8 -8.8 -6.8 0 0
+               C-8.8 6.8 -19.4 6.8 -44 0"
+            fill="url(#platinum_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="7.5" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(130 204)" filter="url(#platinum_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#platinum_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(382 204)" filter="url(#platinum_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#platinum_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    </g>
+</g>
+<text x="1120" y="825" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">魔法铂金</text>
+<text x="1120" y="848" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">MAGIC · PLATINUM</text>
+<rect x="1298" y="507" width="284" height="350" fill="#FFFFFF" stroke="#E1E6ED" filter="url(#sheetShadow)"/>
+<g transform="translate(1342,513) scale(0.38)">
+
+    <defs>
+      <linearGradient id="amethyst_magic_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#250B3B"/>
+        <stop offset="0.18" stop-color="#8D43C7"/>
+        <stop offset="0.36" stop-color="#E6BCFF"/>
+        <stop offset="0.52" stop-color="#4A176D"/>
+        <stop offset="0.70" stop-color="#E6BCFF"/>
+        <stop offset="1" stop-color="#250B3B"/>
+      </linearGradient>
+      <linearGradient id="amethyst_magic_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#E6BCFF"/>
+        <stop offset="0.28" stop-color="#8D43C7"/>
+        <stop offset="0.70" stop-color="#4A176D"/>
+        <stop offset="1" stop-color="#250B3B"/>
+      </linearGradient>
+      <radialGradient id="amethyst_magic_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#C56DFF"/>
+        <stop offset="0.62" stop-color="#8D43C7"/>
+        <stop offset="1" stop-color="#250B3B"/>
+      </radialGradient>
+      <radialGradient id="amethyst_magic_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#E6BCFF" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#8D43C7" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#8D43C7" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="amethyst_magic_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="amethyst_magic_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+        <linearGradient id="amethyst_magic_sweep" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C58EFF" stop-opacity="0"/>
+          <stop offset="0.18" stop-color="#D8A9FF" stop-opacity="0.18"/>
+          <stop offset="0.42" stop-color="#96F1FF" stop-opacity="0.82"/>
+          <stop offset="0.58" stop-color="#FFFFFF" stop-opacity="0.95"/>
+          <stop offset="0.76" stop-color="#CFA0FF" stop-opacity="0.36"/>
+          <stop offset="1" stop-color="#C58EFF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="amethyst_magic_sweepSoft" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.25" stop-color="#D7A5FF" stop-opacity="0.24"/>
+          <stop offset="0.5" stop-color="#8EF2FF" stop-opacity="0.48"/>
+          <stop offset="0.75" stop-color="#D19CFF" stop-opacity="0.24"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="amethyst_magic_ribbon" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#C089FF" stop-opacity="0"/>
+          <stop offset="0.20" stop-color="#DAA5FF" stop-opacity="0.62"/>
+          <stop offset="0.50" stop-color="#90F0FF" stop-opacity="1"/>
+          <stop offset="0.80" stop-color="#D79EFF" stop-opacity="0.62"/>
+          <stop offset="1" stop-color="#C089FF" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="amethyst_magic_ribbon2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B887FF" stop-opacity="0"/>
+          <stop offset="0.28" stop-color="#D4A0FF" stop-opacity="0.54"/>
+          <stop offset="0.54" stop-color="#78F4FF" stop-opacity="0.92"/>
+          <stop offset="0.78" stop-color="#D4A0FF" stop-opacity="0.52"/>
+          <stop offset="1" stop-color="#B887FF" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="amethyst_magic_magicGlow" x="-70%" y="-70%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="9" result="blur"/>
+          <feColorMatrix in="blur" type="matrix"
+            values="0.80 0 0 0 0.16
+                    0 0.68 0 0 0.14
+                    0 0 1 0 0.42
+                    0 0 0 0.96 0" result="tint"/>
+          <feMerge><feMergeNode in="tint"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="amethyst_magic_clip"><path d="M88 300 L80 188 L118 188 L152 136 L182 172 L212 118 L236 74 L256 44 L276 74 L300 118 L330 172 L360 136 L394 188 L432 188 L424 300 Q342 282 256 290 Q170 282 88 300 Z"/><path d="M102 300 C148 308 200 316 256 316 C312 316 364 308 410 300 L400 328 H112 Z"/></clipPath>
+        
+    </defs>
+    
+
+      <g id="crown" filter="url(#amethyst_magic_shadow)">
+        <path d="M88 300 L80 188 L118 188 L152 136 L182 172 L212 118 L236 74 L256 44 L276 74 L300 118 L330 172 L360 136 L394 188 L432 188 L424 300 Q342 282 256 290 Q170 282 88 300 Z" fill="url(#amethyst_magic_metal)" stroke="#250B3B" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M142 274 C174 256 208 266 236 284 C246 292 266 292 276 284 C304 266 338 256 370 274" fill="none" stroke="#E6BCFF" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M102 300 C148 308 200 316 256 316 C312 316 364 308 410 300 L400 328 H112 Z" fill="url(#amethyst_magic_base)" stroke="#250B3B" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M136 318 C174 326 214 332 256 332 C298 332 338 326 376 318" fill="none" stroke="#E6BCFF" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#E6BCFF" stroke-linecap="round" stroke-linejoin="round">
+<path d="M130 188 Q156 150 180 112" stroke-width="4" />
+<path d="M382 188 Q356 150 332 112" stroke-width="4" />
+<path d="M212 118 L236 76 L256 98 L276 76 L300 118" stroke-width="4" />
+<path d="M182 172 Q216 148 256 148 Q296 148 330 172" stroke-width="4" />
+<path d="M236 74 Q246 60 256 60 Q266 60 276 74" stroke-width="4" />
+</g>
+<path d="M80 181 L87 188 L80 195 L73 188 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M152 129 L159 136 L152 143 L145 136 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M182 166 L188 172 L182 178 L176 172 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M236 68 L242 74 L236 80 L230 74 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M256 33 L267 44 L256 55 L245 44 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M276 68 L282 74 L276 80 L270 74 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M330 166 L336 172 L330 178 L324 172 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M360 129 L367 136 L360 143 L353 136 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M432 181 L439 188 L432 195 L425 188 Z" fill="#E6BCFF" stroke="#250B3B" stroke-width="4.1" stroke-linejoin="round"/>
+<circle cx="118" cy="188" r="9" fill="url(#amethyst_magic_gem)" stroke="#250B3B" stroke-width="4.8"/>
+<circle cx="394" cy="188" r="9" fill="url(#amethyst_magic_gem)" stroke="#250B3B" stroke-width="4.8"/>
+<path d="M256 222 L298 270 L256 334 L214 270 Z" fill="url(#amethyst_magic_gem)" stroke="#250B3B" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 246 L276 270 L256 308 L236 270 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+
+    <g clip-path="url(#amethyst_magic_clip)" pointer-events="none">
+      <g filter="url(#amethyst_magic_magicGlow)">
+        <g transform="rotate(-16 256 256)">
+          <rect x="-420" y="-80" width="160" height="720" rx="80" fill="url(#amethyst_magic_sweep)" opacity="0.95">
+            <animate attributeName="x" values="-420;-420;560" dur="6.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="-640" y="-100" width="100" height="760" rx="50" fill="url(#amethyst_magic_sweepSoft)" opacity="0.68">
+            <animate attributeName="x" values="-640;-640;520" dur="7.8s" begin="1.3s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+      </g>
+      <g stroke-linecap="round" fill="none">
+        <path d="M38 188 C106 166 178 172 256 194 C334 216 400 220 472 192" stroke="url(#amethyst_magic_ribbon)" stroke-width="7" opacity="0.90">
+          <animateTransform attributeName="transform" type="translate" values="-12 0;-12 0;16 0;-12 0" dur="6.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.30;0.30;1;0.65;0.30" dur="6.2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M24 296 C92 270 170 276 256 304 C344 332 412 334 488 300" stroke="url(#amethyst_magic_ribbon)" stroke-width="8.8" opacity="0.88">
+          <animateTransform attributeName="transform" type="translate" values="16 0;16 0;-12 0;16 0" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.32;0.32;1;0.68;0.32" dur="6.8s" begin="0.55s" repeatCount="indefinite"/>
+        </path>
+      </g>
+    </g>
+    
+<g>
+    <g transform="translate(256 44)" filter="url(#amethyst_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="7.2s" begin="4.3s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="7.2s" begin="4.3s" repeatCount="indefinite"/>
+      <path d="M0 -60 C4.0 -26.4 4.0 -12.0 0 0
+               C-4.0 -12.0 -4.0 -26.4 0 -60
+               M40 0 C17.6 6.0 8.0 6.0 0 0
+               C8.0 -6.0 17.6 -6.0 40 0
+               M0 60 C-4.0 26.4 -4.0 12.0 0 0
+               C4.0 12.0 4.0 26.4 0 60
+               M-40 0 C-17.6 -6.0 -8.0 -6.0 0 0
+               C-8.0 6.0 -17.6 6.0 -40 0"
+            fill="url(#amethyst_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="6.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(256 222)" filter="url(#amethyst_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <path d="M0 -72 C4.6 -31.7 4.6 -14.4 0 0
+               C-4.6 -14.4 -4.6 -31.7 0 -72
+               M46 0 C20.2 7.2 9.2 7.2 0 0
+               C9.2 -7.2 20.2 -7.2 46 0
+               M0 72 C-4.6 31.7 -4.6 14.4 0 0
+               C4.6 14.4 4.6 31.7 0 72
+               M-46 0 C-20.2 -7.2 -9.2 -7.2 0 0
+               C-9.2 7.2 -20.2 7.2 -46 0"
+            fill="url(#amethyst_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="7.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(118 188)" filter="url(#amethyst_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#amethyst_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(394 188)" filter="url(#amethyst_magic_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#amethyst_magic_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    </g>
+</g>
+<text x="1440" y="825" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#202633">魔法紫水晶</text>
+<text x="1440" y="848" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="12" fill="#7A8494">MAGIC · AMETHYST</text>
+</svg>

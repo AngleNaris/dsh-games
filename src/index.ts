@@ -13,12 +13,13 @@ import { installSettingsSection, settingsNamespace } from '@deepseek-ai/dsh-sett
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import z from '@deepseek-ai/schemastery'
 import {
-  DEFAULT_HAT_TOKEN_STEP,
   DEFAULT_NICKNAME,
   NICKNAME_MAX_LENGTH,
 } from './persist.ts'
+import { DEFAULT_CROWN_TOKEN_STEP } from './crowns.ts'
 import { makeGamesRoutes } from './routes.ts'
 import {
+  DEFAULT_PET_VARIANT,
   GAMES_SETTINGS_NAMESPACE,
   GamesService,
   type GamesConfig,
@@ -38,7 +39,6 @@ export type {
   SetNicknameResult,
 } from './service.ts'
 export {
-  DEFAULT_HAT_TOKEN_STEP,
   DEFAULT_NICKNAME,
   NICKNAME_MAX_LENGTH,
 } from './persist.ts'
@@ -66,6 +66,14 @@ export {
   type RoomStoreOptions,
   type RoomView,
 } from './rooms.ts'
+export { PetStore, validatePet, sniffImage } from './pets.ts'
+export {
+  CROWN_LEVELS,
+  crownCounts,
+  crownTotal,
+  crownUnits,
+  DEFAULT_CROWN_TOKEN_STEP,
+} from './crowns.ts'
 
 /** Stable cordis plugin name (matches cordis.patch.yml insert id). */
 export const name = 'games'
@@ -77,7 +85,10 @@ export const inject = ['webServer']
 export const GAMES_SETTINGS_SCHEMA = z.object({
   enabled: z.boolean().default(true),
   nickname: z.string().min(1).max(NICKNAME_MAX_LENGTH).pattern(/\S/).default(DEFAULT_NICKNAME),
-  hatTokenStep: z.number().step(1).min(1).max(1_000_000_000_000).default(DEFAULT_HAT_TOKEN_STEP),
+  crownTokenStep: z.number().step(1).min(1).max(1_000_000_000_000).default(DEFAULT_CROWN_TOKEN_STEP),
+  petVariant: z.string().min(1).max(64).default(DEFAULT_PET_VARIANT),
+  serverUrl: z.string().max(512).default(''),
+  authToken: z.string().max(256).default(''),
 })
 
 /**
@@ -88,13 +99,17 @@ export const GAMES_SETTINGS_SCHEMA = z.object({
 export function apply(ctx: Context, config: GamesConfig = {}): void {
   const service = new GamesService(ctx, { ...config })
 
-  // The settings surface edits nickname / hat step / enabled through the
-  // `games` namespace. The composition `base` starts as the persisted
-  // values, so an empty user layer resolves to exactly what the pet already
-  // shows. `current()` stays the authoritative section for the service.
+  // The settings surface edits nickname / crown step / enabled / pet pattern
+  // / server URL through the `games` namespace. The composition `base` starts
+  // as the persisted values, so an empty user layer resolves to exactly what
+  // the pet already shows. `current()` stays the authoritative section for
+  // the service.
   const base: GamesSection = {
     nickname: service.nickname(),
-    hatTokenStep: config.hatTokenStep ?? DEFAULT_HAT_TOKEN_STEP,
+    crownTokenStep: config.crownTokenStep ?? config.hatTokenStep ?? DEFAULT_CROWN_TOKEN_STEP,
+    petVariant: config.petVariant ?? DEFAULT_PET_VARIANT,
+    serverUrl: typeof config.serverUrl === 'string' ? config.serverUrl.trim() : '',
+    authToken: typeof config.authToken === 'string' ? config.authToken.trim() : '',
     enabled: config.enabled ?? true,
   }
   let current: () => GamesSection = () => base

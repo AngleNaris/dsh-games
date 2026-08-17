@@ -1,28 +1,105 @@
-# dsh-games — DeepSeek Harness 趣味插件（技术原型）
+# dsh-games — DeepSeek Harness 趣味插件
 
-「桌面宠物 + 多人房间」：在 DSH Web GUI 里养一只 **DeepSeek 鲸鱼 logo 宠物**，
-随你的 token 用量**长出帽子**（默认每 100M token 一顶，可配置）；还能**创建/加入
-房间**，实时看到房间内所有玩家的宠物、昵称、token 与帽子。
+「桌面宠物 + 王冠成长 + 多人房间」：在 DSH Web GUI 里养一只 **DeepSeek 鲸鱼宠物**（可换
+图案、可上传自定义 PNG/GIF），随 token 用量**获得王冠**（默认每 100M token 一顶青铜王冠，
+10 顶自动合成更高阶，魔法王冠带附魔流动特效）；还能在**公开/邀请制房间**里实时看到所有
+玩家的宠物、王冠、昵称与 token。
 
-**只依赖两样东西**：DSH 官方 NPM SDK（`@deepseek-ai/*`）+ 插件自身
-host 半区（房间服务器就运行在你的 DSH host 进程里）。**不依赖** dsh-skin /
-dsh-pet 等任何其他插件，单独安装即可使用。
+**只依赖两样东西**：DSH 官方 NPM SDK（`@deepseek-ai/*`）+ 插件自身 host 半区。多人部分
+由一个**独立的游戏服务器**承载（房间 + 宠物同步），可以 Docker 部署，也可以直接用 DSH
+host 进程内的挂载点跑（本机原型）。**不依赖** dsh-skin / dsh-pet 等其他插件。
 
 ---
 
 ## 功能
 
-- **桌面宠物**：右下角漂浮的 DeepSeek 鲸鱼（官方 logo 路径内嵌），随模型活动
-  切换动画（思考/工具/完成），可拖拽、可隐藏/召唤。
+- **桌面宠物**：右下角漂浮的 DeepSeek 鲸鱼（官方 logo 路径内嵌），随模型活动切换动画
+  （思考/工具/完成），可拖拽、可隐藏/召唤、可调整**大小**（48–512px）、可**锁定位置**、
+  一键复位。
+- **宠物图案**：6 种内置配色（深海蓝/绯红/翡翠/鎏金/紫罗兰/海洋青），设置卡或宠物面板
+  随时切换。
+- **自定义宠物**：上传自己的 PNG / GIF（≤ 2MB，最长边 ≤ 1024px，服务器校验魔数 + 像素
+  尺寸），上传后**自动同步到房间**——房间内所有人看到的是你的宠物形象。
 - **昵称**：点宠物打开「深海小屋」面板即可改名，也可在设置卡里改。
-- **帽子系统**：host 实时累计**所有会话**的 usage token（input + output +
-  cacheRead + cacheWrite），`帽子数 = 累计token / 每帽token`（默认
-  **100,000,000 = 100M**）。设置卡里可改每帽阈值，或一键「演示：加一顶帽子」。
+- **王冠系统**（替代原型阶段的帽子）：
+  - host 实时累计**所有会话**的 usage token（input + output + cacheRead + cacheWrite），
+    王冠等级由**游戏服务器的规则**决定（默认每 **1M** token 一顶青铜王冠）；
+  - **3 个同阶王冠自动合成下一阶**，等级链：**青铜 → 白银 → 黄金 → 铂金 → 紫水晶 →
+    魔法青铜 → 魔法白银 → 魔法黄金 → 魔法铂金 → 魔法紫水晶**（库存是 token 按 3 进制
+    分解，合成天然成立、重启不丢）：
+
+    | 等级 | 所需青铜数 | 累计 Token |
+    | --- | ---: | ---: |
+    | 青铜 | 1 | 1M |
+    | 白银 | 3 | 3M |
+    | 黄金 | 9 | 9M |
+    | 铂金 | 27 | 27M |
+    | 紫水晶 | 81 | 81M |
+    | 魔法青铜 | 243 | 243M |
+    | 魔法白银 | 729 | 729M |
+    | 魔法黄金 | 2,187 | 2.187B |
+    | 魔法铂金 | 6,561 | 6.561B |
+    | 魔法紫水晶 | 19,683 | 19.683B |
+  - 王冠在宠物头上按**金字塔**堆叠（低阶在下、每层一行，超量折叠成 `+N` 徽章）；
+  - **魔法等级**的王冠带 Minecraft 式流动附魔光效（SVG 斜纹 pattern 动画 + 光晕呼吸）；
+  - **token 消耗特效**：模型思考/工具期间宠物下方的 token 标签持续流光；token 增长时
+    标签爆发脉冲并弹出 `+N`；获得/合成王冠时弹出气泡（「获得青铜王冠！」「合成白银
+    王冠！」）。
 - **多人房间**：
-  - 任意实例点「创建房间」→ 得到一个 4 位房间代码 + 房间地址；
-  - 朋友在另一台机器/另一个实例点「加入房间」输入地址 + 代码；
-  - 加入后每个玩家每 3s 上报自己的宠物状态（昵称/token/帽子/活动相位），
-    所有人实时看到房间成员列表（迷你宠物 + 帽子 + 数据 + 在线相位点）。
+  - **房间列表**：面板里列出游戏服务器上所有**公开房间**（名称/代码/人数），点一下即加入；
+  - **公开 / 邀请制**：创建房间时可选择——公开房间上列表，任何人都能加入；邀请制房间
+    不在列表出现，只有拿到代码的人能加入；
+  - 加入后每 3s 上报宠物状态（昵称/token/王冠/活动相位/自定义宠物 URL），所有人实时看到
+    成员列表（宠物图 + 王冠 + 数据 + 相位点）；
+  - **自动回房**：只要没有主动「离开房间」，下次打开页面自动回到之前的房间。
+
+## 部署：游戏服务器（Docker）
+
+多人房间、王冠规则和宠物同步依赖一个**独立的游戏服务器**（不含 DSH 本体，镜像里只有
+零依赖的 `lib/server.js`）。线上地址：**https://temp.3efs.com**（已部署在 vps.3efs.com，
+OpenResty 反代 + TLS）。
+
+```sh
+node tools/deploy-server.mjs --host root@vps.3efs.com --key <私钥路径>
+# 等价手工程序：pnpm build && docker compose up -d --build
+# （本地 docker 直接跑：docker build -t dsh-games-server . && docker run -d
+#    -p 127.0.0.1:3080:3080 -v ./data:/data dsh-games-server）
+```
+
+部署脚本会：构建 `lib/server.js` → 组装部署树（server bundle + Dockerfile +
+compose + `data/config.json`——已存在则保留原密钥，首次部署自动生成随机
+`authToken` 并打印）→ rsync 到服务器 → `docker compose up -d --build`。
+
+- 监听 `127.0.0.1:3080`（只走反代，不直接暴露公网；环境变量 `GAME_HOST` / `GAME_PORT` /
+  `GAME_DATA` 可改）；
+- **配置**：`<GAME_DATA>/config.json`（挂载卷内，改完重启容器生效）：
+
+  ```json
+  {
+    "authToken": "…",                  // 服务器密钥：配置后所有请求必须带 ?token=…，
+                                       // 未带/错误一律 401（防陌生人建房/上传/抓图）
+    "crown": { "tokenStep": 1000000,   // 每顶青铜王冠的 token 数
+               "base": 3,              // 合成基数（3 个合成 1 个高一级）
+               "levels": ["bronze", "silver", "gold", "platinum", "amethyst",
+                          "magic-bronze", "magic-silver", "magic-gold",
+                          "magic-platinum", "magic-amethyst"] },
+    "pet": { "maxBytes": 2097152,      // 上传大小上限（字节）
+             "maxDimension": 1024 }    // 最长边像素上限
+  }
+  ```
+
+- 宠物图落在挂载卷 `./data/pets/`（compose 已挂 `./data:/data`，容器重建不丢）；
+- 上传强制校验：PNG/GIF 魔数 + 解码像素尺寸 + 大小上限（Content-Length 预检直接 413），
+  上传与读取都要求鉴权 token；
+- 健康检查打 `/api/games/rules`（无 token 返回 401 即视为健康：服务在跑且鉴权启用）。
+
+然后在插件设置里把「游戏服务器地址」填成 `https://temp.3efs.com`、「服务器密钥」填成
+服务器 `config.json` 里的 `authToken` 保存即可——房间列表、建房、宠物上传与同步都走
+这台服务器。**客户端会从服务器拉取规则**（王冠表/上传限制）并本地应用，设置卡里只读
+展示当前规则。
+
+> 不想部署独立服务器？`node lib/server.js` 直接跑，或让每台 DSH 自己当服务器（serverUrl
+> 留空，host 进程内挂载同一套接口，本机原型不需要 Docker 也能玩）。
 
 ## 安装
 
@@ -40,81 +117,106 @@ dsh web
 ```
 
 浏览器打开 `http://127.0.0.1:3080`，右下角出现鲸鱼宠物即成功。
-插件设置位于：设置 → 插件 → 插件配置 → Web UI 插件 → **深海小屋（宠物 + 房间）**。
+插件设置位于：设置 → 插件 → **深海小屋（宠物 + 王冠 + 房间）**——卡片直接注册在
+插件配置列表的顶层（与 Shell / Web search 等官方卡并列），**不依赖任何其他插件的
+设置分组**（启用插件 / 隐藏宠物 / 昵称 / 宠物图案 / 游戏服务器地址 / 服务器密钥 /
+演示加一顶王冠）。王冠规则与上传限制来自服务器配置，设置卡只读展示。
 
-> 说明：官方 dsh-host-apiproxy 对第三方设置命名空间有硬编码白名单，因此
-> 设置卡走插件自己的 `/api/games/*` HTTP 接口（host 侧会同时把值镜像进
-> `~/.dsh/settings.yaml` 的 `games:` 段），任何部署下都可用。
+> 说明：官方 dsh-host-apiproxy 对第三方设置命名空间有硬编码白名单，因此设置卡走插件
+> 自己的 `/api/games/*` HTTP 接口（host 侧会同时把值镜像进 `~/.dsh/settings.yaml` 的
+> `games:` 段），任何部署下都可用。
 
-## 多人演示（本机两实例）
+## 多人演示（本机两实例 + 独立服务器）
 
 ```sh
-# 实例 A（默认）
+# 0.（可选）独立游戏服务器，所有玩家共用
+docker compose up -d --build        # 或 node lib/server.js
+
+# 1. 实例 A（默认，serverUrl 留空 = 本机即服务器）
 dsh web
 
-# 实例 B：独立的 DSH_HOME => 独立的身份与 token 账本
+# 2. 实例 B：独立的 DSH_HOME => 独立的身份与 token 账本
 mkdir %USERPROFILE%\.dsh-b
 mklink /J %USERPROFILE%\.dsh-b\profiles %USERPROFILE%\.dsh\profiles   # 共享同一 profile（含本插件）
 set DSH_HOME=%USERPROFILE%\.dsh-b
 dsh web --port 3081
 ```
 
-- A：点宠物 → 创建房间 → 记下代码（如 `VWS8`）。
-- B：点宠物 → 加入房间 → 地址填 `http://127.0.0.1:3080` + 代码。
-- 两边同时看到双方宠物；任意一边 token 增长（或点「演示：加一顶帽子」），
-  另一边 3~6 秒内看到帽子变化。
+- A：点宠物 → 面板里能看到**公开房间列表**；创建房间（选「公开」或「邀请制」），记下代码；
+- B：点宠物 → 房间列表里点 A 的公开房，或「用代码加入」输入地址 + 代码；
+- 两边同时看到双方宠物（含自定义形象）；任意一边 token 增长（或点「演示：加一顶王冠」），
+  另一边 3~6 秒内看到王冠变化；
+- 关掉浏览器再打开：**自动回到之前的房间**（除非点过「离开房间」）。
 
-真实多人：把房间地址 + 代码发给局域网内的朋友（对方也安装本插件即可；
-若对方机器无法访问你的端口，可把 `dsh web` 绑到 `0.0.0.0`）。
+真实多人：把**游戏服务器地址**填成同一台（Docker 部署的那台），所有玩家的房间列表和
+宠物同步都走它；不填服务器地址的话，房间就在各自的 DSH host 里，跨机需要互相可达端口。
 
 ## 架构
 
 ```
 浏览器 (client 半区, lib/client.js)
  ├─ 漂浮宠物 / 深海小屋面板 / 房间列表 / 设置卡   (React, 挂 document.body)
- └─ 轮询：自己的 /api/games/state（2s）；房间心跳+快照（3s）
+ └─ 轮询：自己的 /api/games/state（2s，同源）；
+    游戏服务器：房间列表/建房/心跳+快照（3s）/宠物上传（跨域 CORS 开放）
 
 DSH host 进程 (host 半区, lib/index.js)
  ├─ GamesService
  │   ├─ token 账本：监听 session/event（assistant/message 与 usage chunk），
- │   │   按 (sessionId, turn, step) 去重（跨进程用持久化 frontier，进程内
- │   │   用增量合并），累计写入 $DSH_HOME/games.json
+ │   │   按 (sessionId, turn, step) 去重（跨进程持久化 frontier，进程内增量合并），
+ │   │   累计写入 $DSH_HOME/games.json；王冠 = token 的 10 进制分解
  │   ├─ 活动相位：activity/status → idle/thinking/tool/done
- │   └─ 房间存储：内存 RoomStore（成员心跳 20s 超时清理）
- ├─ HTTP 路由 /api/games/*
- │   ├─ state / nickname / boost / display / config
- │   └─ rooms/<code>/state | members (POST/DELETE) — 跨域 CORS 开放
- └─ settings 命名空间 `games`（enabled / nickname / hatTokenStep）
+ │   ├─ 显示/设置：大小/位置/锁定/图案/服务器地址/自定义宠物 meta（$DSH_HOME/pets）
+ │   └─ 房间 + 宠物 HTTP 面：gameserver.ts 共享处理器挂载在
+ │       /api/games/rooms* 与 /api/games/pets*（CORS 开放）
+ ├─ HTTP 路由 /api/games/*：state / nickname / boost / display / config / pet-meta
+ └─ settings 命名空间 `games`（enabled / nickname / crownTokenStep / petVariant / serverUrl）
+
+独立游戏服务器 (lib/server.js, Docker)
+ └─ 与 host 完全相同的共享处理器：房间（公开列表/创建/心跳/离开/清扫）+ 宠物存储
+    （PNG/GIF 魔数校验、尺寸解析、大小上限、原子落盘 /data/pets），零运行时依赖
 ```
 
 关键文件：
 
 - `src/index.ts` — host 入口（服务 + 路由 + 设置区注册）
-- `src/service.ts` — GamesService（账本 / 相位 / 显示 / 配置）
+- `src/service.ts` — GamesService（账本 / 相位 / 显示 / 配置 / 宠物 meta）
+- `src/crowns.ts` — 王冠等级链、颜色、10 进制分解（host 与浏览器共享）
 - `src/ledger.ts` — token 累计纯逻辑（frontier + 增量合并去重）
-- `src/rooms.ts` — 房间存储（代码生成 / 心跳 / 过期清理）
-- `src/routes.ts` — `/api/games/*` HTTP 路由（含 CORS）
+- `src/rooms.ts` — 房间存储（代码生成 / 公开-邀请制 / 列表 / 心跳 / 过期清理）
+- `src/pets.ts` — 宠物文件存储（魔数 + 像素校验，原子写）
+- `src/gameserver.ts` — 共享游戏服务器 HTTP 面（房间 + 宠物，CORS）
+- `src/server-entry.ts` — 独立服务器入口（env 配置，Docker CMD）
+- `src/routes.ts` — `/api/games/*` 个人路由 + 共享面挂载
 - `src/persist.ts` — `$DSH_HOME/games.json` 读写
-- `src/client/` — 浏览器半区（宠物 / 面板 / 房间 / 设置卡 / 双语文案）
+- `src/client/` — 浏览器半区（宠物 / 王冠 / 面板 / 房间 / 设置卡 / 双语文案）
+- `Dockerfile` + `docker-compose.yml` — 游戏服务器部署
 - `tools/verify*.mjs` — 浏览器端验证脚本（playwright）
 
 ## 数据
 
-- `$DSH_HOME/games.json`：memberId、累计 token、按会话的计数 frontier、显示布局。
-- `$DSH_HOME/settings.yaml` 的 `games:` 段：enabled / nickname / hatTokenStep。
+- `$DSH_HOME/games.json`：memberId、累计 token、按会话的计数 frontier、显示布局、
+  自定义宠物 meta。
+- `$DSH_HOME/pets/`：上传的自定义宠物图片（本机挂载模式）。
+- 游戏服务器（Docker）：`/data/pets/` 存宠物图片、`/data/config.json` 存规则与
+  鉴权密钥；房间是内存态。
+- `$DSH_HOME/settings.yaml` 的 `games:` 段：enabled / nickname / crownTokenStep /
+  petVariant / serverUrl / authToken。
 
 ## 开发
 
 ```sh
-pnpm build        # tsc 类型 + tsdown 双产物（lib/index.js + lib/client.js）
+pnpm build        # tsc 类型 + tsdown 三产物（lib/index.js + lib/client.js + lib/server.js）
 pnpm typecheck
-node tools/verify.mjs        # 单实例功能验证（宠物/改名/建房/帽子/截图）
-node tools/verify-multi.mjs  # 双实例多人验证（需 3081 实例在跑）
+node lib/server.js          # 本地跑独立游戏服务器
+node tools/verify.mjs       # 单实例功能验证（召唤/王冠/改名/房间/特效/上传/截图）
+node tools/verify-multi.mjs # 双实例多人验证（需 3081 实例在跑）
+node tools/verify-visual.mjs# 像素级 + 设置卡验证
 ```
 
 ## 限制（原型范围）
 
-- 房间是内存态、信任模型：成员自行上报 token/帽子，不做校验；host 重启后
-  房间清空（成员重新加入即可）。
+- 房间是内存态、信任模型：成员自行上报 token/王冠，不做校验；服务器重启后房间清空
+  （成员重新心跳即可）。
 - 只统计**提供方返回的 usage**；不返回 usage 的 provider 不计入。
-- 默认每帽 100M token 是为长期使用设计；演示时可在设置卡调小阈值。
+- 王冠库存由 token 推导（3 进制分解，规则来自服务器 config.json），跨版本/重启天然一致。
+- 服务器配置了 `authToken` 后所有接口强制鉴权；宠物图上传/读取同样受控，无法匿名抓取。

@@ -1,0 +1,23 @@
+{
+  "authToken": "replace-with-a-random-secret",
+  "crown": {
+    "tokenStep": 1000000,
+    "base": 3,
+    "levels": [
+      "bronze",
+      "silver",
+      "gold",
+      "platinum",
+      "amethyst",
+      "magic-bronze",
+      "magic-silver",
+      "magic-gold",
+      "magic-platinum",
+      "magic-amethyst"
+    ]
+  },
+  "pet": {
+    "maxBytes": 2097152,
+    "maxDimension": 1024
+  }
+}

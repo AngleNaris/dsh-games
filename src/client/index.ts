@@ -1,9 +1,14 @@
 /**
- * dsh-games browser half — mounts the floating DeepSeek-whale pet (with
- * token hats and the nickname / room UI) as a global surface on
- * document.body, and seats the plugin settings card in the Web UI plugin
- * group. The pet is host-global (no session dimension), so it mounts via a
- * single React root rather than a session-scoped slot, mirroring dsh-pet.
+ * dsh-games browser half — mounts the floating DeepSeek-whale pet (with the
+ * crown pyramid and the nickname / room / customization UI) as a global
+ * surface on document.body, and seats the plugin settings card directly in
+ * the top-level plugin configuration section (设置 → 插件 → 可配置), NOT inside
+ * the Web UI plugin group — this plugin is standalone and does not depend on
+ * any other plugin's surfaces.
+ *
+ * The pet surface lives inside a `ctx.effect` with a full cleanup: on HMR
+ * reload the old root unmounts instead of stacking a second overlapping pet
+ * (the module re-apply used to leave the old root mounted on document.body).
  * @module @linxin666/dsh-games/client
  */
 
@@ -28,16 +33,17 @@ export type { GamesState, JoinedRoom, RoomMemberView, RoomView } from './api.ts'
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
     /**
-     * The child slot the Web UI plugin group declares; this card registers
-     * into the group instead of the top-level `settings.plugin.item` list.
-     * Spelled here with the same shape so this package can register without
-     * depending on the sibling UI package.
+     * The top-level plugin configuration section (设置 → 插件 → 可配置) lists
+     * one card per configurable plugin. Registering here — instead of the
+     * `web-ui.plugin.item` group slot — keeps this plugin's settings card a
+     * standalone entry, independent of any other plugin's UI group. The
+     * section supplies no owner props.
      */
-    'web-ui.plugin.item': { kind: 'list'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
+    'settings.plugin.item': { kind: 'list'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
   }
 }
 
-/** Owner share of a plugin card (the group card supplies nothing). */
+/** Owner share of a plugin card (the section supplies nothing). */
 export interface SettingsPluginItemOwnerProps {
   /** Marker field: card owner props are intentionally empty. */
   children?: never
@@ -50,8 +56,13 @@ const GAMES_SETTINGS_NS = 'games'
 interface GamesSettings {
   enabled?: boolean
   nickname?: string
-  hatTokenStep?: number
+  crownTokenStep?: number
+  petVariant?: string
+  serverUrl?: string
 }
+
+/** DOM marker of the pet root container (cleaned up on re-apply). */
+const PET_ROOT_MARKER = 'data-dsh-games-root'
 
 /** Required services. */
 export const inject = ['slots', 'locale', 'connection', 'settingsScope', 'remote']
@@ -64,6 +75,13 @@ export const inject = ['slots', 'locale', 'connection', 'settingsScope', 'remote
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'games: dictionaries')
 
+  // HMR re-apply (or a previously stacked instance) may have left a pet root
+  // on document.body — drop any leftovers before mounting the new one, so the
+  // page never shows two overlapping whales.
+  for (const stale of document.querySelectorAll<HTMLElement>(`[${PET_ROOT_MARKER}]`)) {
+    stale.remove()
+  }
+
   const settingsScope = ctx.settingsScope.bind<GamesSettings>({ namespace: GAMES_SETTINGS_NS })
   const enabled = (): boolean => {
     const snapshot = settingsScope.getSnapshot()
@@ -72,39 +90,46 @@ export function apply(ctx: ClientContext): void {
       : snapshot.status === 'unavailable'
   }
 
-  // Plugin configuration card: a self-contained form over the games HTTP API
+  // Plugin configuration card: a self-contained form over the games HTTP API,
+  // contributed as its own card in the top-level plugin configuration list
   // (the settings namespace is not apiproxy-exposed for third parties).
-  ctx.slots.inject('web-ui.plugin.item', () => ctx.slots.register({
-    name: 'web-ui.plugin.item',
-    id: 'games-settings',
+  ctx.slots.inject('settings.plugin.item', () => ctx.slots.register({
+    name: 'settings.plugin.item',
+    id: 'games',
     order: 150,
     locale: NS,
     inject: () => ({}),
   }, GamesSettingsCard))
 
-  // The global pet surface and its poll loops live while the plugin is
-  // enabled; toggling the setting off unmounts the pet and stops polling.
-  let disposeUi: (() => void) | undefined
-  const syncUi = (): void => {
-    if (enabled() && disposeUi === undefined) {
-      const styleTag = injectStyles()
-      const container = document.createElement('div')
-      container.dataset.dshGamesRoot = ''
-      document.body.appendChild(container)
-      const petRoot = createRoot(container)
-      petRoot.render(createElement(GamesApp, { t }))
+  // The global pet surface and its poll loops live inside an effect with a
+  // real cleanup: on plugin dispose / HMR reload the root unmounts and the
+  // container leaves the DOM. The `enabled` setting only decides what the
+  // root renders — the surface itself stays mounted while the plugin runs.
+  ctx.effect(() => {
+    // The stylesheet is idempotent and shared with any concurrently mounted
+    // instance (HMR overlap) — inject it, but never remove it on dispose.
+    injectStyles()
+    const container = document.createElement('div')
+    container.dataset.dshGamesRoot = ''
+    document.body.appendChild(container)
+    const petRoot = createRoot(container)
 
-      disposeUi = () => {
-        petRoot.unmount()
-        container.remove()
-        styleTag?.remove()
-        disposeUi = undefined
+    const render = (): void => {
+      if (enabled()) {
+        petRoot.render(createElement(GamesApp, { t }))
+      } else {
+        // Master switch off: render nothing (the summon/hide UI is gone too);
+        // the root stays mounted so it returns the moment the setting flips.
+        petRoot.render(null)
       }
-    } else if (!enabled() && disposeUi !== undefined) {
-      disposeUi()
-      disposeUi = undefined
     }
-  }
-  settingsScope.subscribe(syncUi)
-  syncUi()
+    const unsubscribe = settingsScope.subscribe(render)
+    render()
+
+    return () => {
+      unsubscribe()
+      petRoot.unmount()
+      container.remove()
+    }
+  }, 'games: pet surface')
 }

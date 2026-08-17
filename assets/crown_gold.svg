@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+
+    <defs>
+      <linearGradient id="gold_base_metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#5A3200"/>
+        <stop offset="0.18" stop-color="#F0B52C"/>
+        <stop offset="0.36" stop-color="#FFF1A6"/>
+        <stop offset="0.52" stop-color="#9A5A00"/>
+        <stop offset="0.70" stop-color="#FFF1A6"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </linearGradient>
+      <linearGradient id="gold_base_base" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFF1A6"/>
+        <stop offset="0.28" stop-color="#F0B52C"/>
+        <stop offset="0.70" stop-color="#9A5A00"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </linearGradient>
+      <radialGradient id="gold_base_gem" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset="0.18" stop-color="#FFD45C"/>
+        <stop offset="0.62" stop-color="#F0B52C"/>
+        <stop offset="1" stop-color="#5A3200"/>
+      </radialGradient>
+      <radialGradient id="gold_base_sparkleCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="1"/>
+        <stop offset="0.48" stop-color="#FFF1A6" stop-opacity="1"/>
+        <stop offset="0.74" stop-color="#F0B52C" stop-opacity="0.62"/>
+        <stop offset="1" stop-color="#F0B52C" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="gold_base_shadow" x="-30%" y="-30%" width="160%" height="170%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feOffset in="blur" dx="0" dy="7" result="offsetBlur"/>
+        <feColorMatrix in="offsetBlur" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.24 0" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="gold_base_softGlow" x="-140%" y="-140%" width="380%" height="380%">
+        <feGaussianBlur stdDeviation="7.4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      
+    </defs>
+    
+
+      <g id="crown" filter="url(#gold_base_shadow)">
+        <path d="M108 318 L100 218 L144 222 L176 166 L204 196 L228 146 L246 114 L256 96 L266 114 L284 146 L308 196 L336 166 L368 222 L412 218 L404 318 Q330 302 256 308 Q182 302 108 318 Z" fill="url(#gold_base_metal)" stroke="#5A3200" stroke-width="7.2" stroke-linejoin="round"/>
+        <path d="M150 290 C178 278 206 284 230 294 C242 300 270 300 282 294 C306 284 334 278 362 290" fill="none" stroke="#FFF1A6" stroke-opacity="0.56" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M120 318 C162 326 208 332 256 332 C304 332 350 326 392 318 L384 350 H128 Z" fill="url(#gold_base_base)" stroke="#5A3200" stroke-width="6.2" stroke-linejoin="round"/>
+        <path d="M148 336 C182 342 218 346 256 346 C294 346 330 342 364 336" fill="none" stroke="#FFF1A6" stroke-opacity="0.70" stroke-width="4.4" stroke-linecap="round"/>
+      </g>
+    
+<g fill="none" stroke="#FFF1A6" stroke-linecap="round" stroke-linejoin="round">
+<path d="M160 226 Q182 192 200 158" stroke-width="4" />
+<path d="M352 226 Q330 192 312 158" stroke-width="4" />
+<path d="M228 146 L246 118 L256 132 L266 118 L284 146" stroke-width="4" />
+<path d="M204 196 Q228 182 256 182 Q284 182 308 196" stroke-width="4" />
+</g>
+<path d="M100 211 L107 218 L100 225 L93 218 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M176 159 L183 166 L176 173 L169 166 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M204 190 L210 196 L204 202 L198 196 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M256 87 L265 96 L256 105 L247 96 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M308 190 L314 196 L308 202 L302 196 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M336 159 L343 166 L336 173 L329 166 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<path d="M412 211 L419 218 L412 225 L405 218 Z" fill="#FFF1A6" stroke="#5A3200" stroke-width="4.1" stroke-linejoin="round"/>
+<circle cx="144" cy="222" r="9" fill="url(#gold_base_gem)" stroke="#5A3200" stroke-width="4.8"/>
+<circle cx="368" cy="222" r="9" fill="url(#gold_base_gem)" stroke="#5A3200" stroke-width="4.8"/>
+<path d="M256 256 L286 290 L256 330 L226 290 Z" fill="url(#gold_base_gem)" stroke="#5A3200" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M256 270 L272 290 L256 312 L240 290 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.60" stroke-width="3.4" stroke-linejoin="round"/>
+<g>
+    <g transform="translate(256 96)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="7.0s" begin="4.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="7.0s" begin="4.0s" repeatCount="indefinite"/>
+      <path d="M0 -52 C3.4 -22.9 3.4 -10.4 0 0
+               C-3.4 -10.4 -3.4 -22.9 0 -52
+               M34 0 C15.0 5.2 6.8 5.2 0 0
+               C6.8 -5.2 15.0 -5.2 34 0
+               M0 52 C-3.4 22.9 -3.4 10.4 0 0
+               C3.4 10.4 3.4 22.9 0 52
+               M-34 0 C-15.0 -5.2 -6.8 -5.2 0 0
+               C-6.8 5.2 -15.0 5.2 -34 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="5.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(256 256)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="5.8s" begin="2.0s" repeatCount="indefinite"/>
+      <path d="M0 -66 C4.2 -29.0 4.2 -13.2 0 0
+               C-4.2 -13.2 -4.2 -29.0 0 -66
+               M42 0 C18.5 6.6 8.4 6.6 0 0
+               C8.4 -6.6 18.5 -6.6 42 0
+               M0 66 C-4.2 29.0 -4.2 13.2 0 0
+               C4.2 13.2 4.2 29.0 0 66
+               M-42 0 C-18.5 -6.6 -8.4 -6.6 0 0
+               C-8.4 6.6 -18.5 6.6 -42 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="7.1" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(144 222)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.6s" begin="3.0s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    
+    <g transform="translate(368 222)" filter="url(#gold_base_softGlow)" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0;1;0.72;0;0;0;0.95;0.35;0" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" additive="sum" type="scale"
+        values="0.55;0.55;0.55;1.18;0.94;0.55;0.55;0.55;1.08;0.86;0.55" dur="6.5s" begin="3.7s" repeatCount="indefinite"/>
+      <path d="M0 -32 C2.0 -14.1 2.0 -6.4 0 0
+               C-2.0 -6.4 -2.0 -14.1 0 -32
+               M20 0 C8.8 3.2 4.0 3.2 0 0
+               C4.0 -3.2 8.8 -3.2 20 0
+               M0 32 C-2.0 14.1 -2.0 6.4 0 0
+               C2.0 6.4 2.0 14.1 0 32
+               M-20 0 C-8.8 -3.2 -4.0 -3.2 0 0
+               C-4.0 3.2 -8.8 3.2 -20 0"
+            fill="url(#gold_base_sparkleCore)"/>
+      <circle cx="0" cy="0" r="3.8" fill="#FFFFFF" opacity="1"/>
+    </g>
+    </g>
+</svg>

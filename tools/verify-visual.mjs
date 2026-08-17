@@ -26,14 +26,21 @@ page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()
 page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`))
 
 await page.goto(BASE, { waitUntil: 'networkidle' })
-await page.waitForSelector('[data-testid="games-pet"]', { timeout: 20_000 })
+await page.waitForSelector('[data-testid="games-summon"], [data-testid="games-pet"]', { timeout: 20_000 })
+if (await page.locator('[data-testid="games-summon"]').count()) {
+  await page.click('[data-testid="games-summon"]')
+  await page.waitForTimeout(1_500)
+}
+await page.waitForSelector('[data-testid="games-pet"]', { timeout: 10_000 })
 await page.waitForTimeout(2_000)
 
-// ---- 1. pet geometry ----
+// ---- 1. pet geometry (custom pet image or the built-in whale SVG) ----
 const box = await (await page.locator('[data-testid="games-pet"]').boundingBox())
 console.log(`[visual] pet box: ${JSON.stringify(box)}`)
-const whaleBox = await (await page.locator('[data-testid="games-pet"] svg[role="img"]').boundingBox())
-console.log(`[visual] whale svg box: ${JSON.stringify(whaleBox)}`)
+const petArt = page.locator('[data-testid="games-pet"] svg[role="img"], [data-testid="games-pet"] .dsg-pet-img').first()
+await petArt.waitFor({ state: 'visible', timeout: 5_000 })
+const whaleBox = await (await petArt.boundingBox())
+console.log(`[visual] pet art box: ${JSON.stringify(whaleBox)}`)
 
 // ---- 2. pixel sample the whale area for brand blue ----
 const clip = {

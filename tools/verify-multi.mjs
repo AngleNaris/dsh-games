@@ -58,8 +58,8 @@ console.log(`[multi] A created room ${code}`)
 // B joins A's room.
 await pageB.click('[data-testid="games-pet"]')
 await pageB.waitForSelector('[data-testid="games-popover"]')
-// The join form: click 加入房间 (ghost button next to 创建房间).
-await pageB.click('[data-testid="games-room-empty"] button:has-text("加入房间")')
+// The join form: click 用代码加入 (ghost button next to 创建房间).
+await pageB.click('[data-testid="games-room-empty"] button:has-text("用代码加入")')
 await pageB.fill('#dsg-room-url', A)
 await pageB.fill('#dsg-room-code', code)
 await pageB.click('[data-testid="games-room-join"]')

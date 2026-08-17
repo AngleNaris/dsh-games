@@ -1,0 +1,29 @@
+# dsh-games standalone game server — one service, data in a bind-mounted
+# ./data directory (config.json rules + auth token, pets/ uploads).
+# Deploy with `node tools/deploy-server.mjs` (builds, ships lib/server.js and
+# this compose file, runs `docker compose up -d --build` on the server), or:
+#   docker build -t dsh-games-server . && \
+#   docker run -d --name dsh-games-server --restart unless-stopped \
+#     -p 127.0.0.1:3080:3080 -v ./data:/data dsh-games-server
+services:
+  dsh-games-server:
+    build: .
+    image: dsh-games-server
+    container_name: dsh-games-server
+    restart: unless-stopped
+    # 只绑定本机回环：公网入口走反代（如 temp.3efs.com 的 OpenResty），不直接暴露
+    ports:
+      - "127.0.0.1:3080:3080"
+    environment:
+      - GAME_HOST=0.0.0.0
+      - GAME_PORT=3080
+      - GAME_DATA=/data
+    volumes:
+      - ./data:/data
+    # 无 token 请求返回 401 = 服务在跑且鉴权已启用（authToken 配置在 data/config.json）
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3080/api/games/rules').then(r=>{if(r.status!==401)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

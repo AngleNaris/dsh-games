@@ -1,0 +1,13 @@
+.git
+node_modules
+src
+tools
+assets
+deploy
+lib/index.js
+lib/index.js.map
+lib/client.js
+lib/client.js.map
+*.tsbuildinfo
+*.log
+data

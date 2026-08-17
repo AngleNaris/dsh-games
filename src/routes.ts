@@ -1,21 +1,30 @@
 /**
- * Games HTTP routes — the browser half talks to the host through plain JSON
- * endpoints under `/api/games/*`. The room family (`/api/games/rooms/*`) is
- * served with permissive CORS so other dsh instances (or plain web pages)
- * can join the same room across origins during the prototype phase.
+ * Games HTTP routes (host half) — the browser talks to its own DSH host for
+ * personal state (`/api/games/state`, nickname, boost, display, config, pet
+ * meta), and to the **game server** for everything multiplayer: the shared
+ * room + pet surface from gameserver.ts is mounted in-process under
+ * `/api/games/rooms*` and `/api/games/pets*` so local prototype play works
+ * without a separate deployment. The standalone `lib/server.js` serves that
+ * same surface in Docker.
  * @module @linxin666/dsh-games/routes
  */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { WebRoute } from '@deepseek-ai/dsh-host-webserver'
 import type { GamesService } from './service.ts'
-import type { MemberReport } from './rooms.ts'
+import { defaultGameRules } from './gameconfig.ts'
+import {
+  handleGameServer,
+  PET_API_PREFIX,
+  ROOM_API_PREFIX,
+  RULES_API_PATH,
+} from './gameserver.ts'
 
 /** Browser-facing base path of the games API. */
 export const GAMES_API_PREFIX = '/api/games'
 
-/** Browser-facing base path of the room API family. */
-export const ROOM_API_PREFIX = '/api/games/rooms'
+/** Re-exported shared-surface prefixes (browser consumers). */
+export { PET_API_PREFIX, ROOM_API_PREFIX } from './gameserver.ts'
 
 /** Write one JSON response. */
 function json(res: ServerResponse, status: number, body: unknown): void {
@@ -34,17 +43,20 @@ function requireMethod(req: IncomingMessage, res: ServerResponse, method: string
 function readJsonBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
     let size = 0
+    let overflowed = false
     const chunks: Buffer[] = []
     req.on('data', (chunk: Buffer) => {
+      if (overflowed) return
       size += chunk.length
       if (size > 64 * 1024) {
+        overflowed = true
         reject(new Error('body-too-large'))
-        queueMicrotask(() => req.destroy())
         return
       }
       chunks.push(chunk)
     })
     req.on('end', () => {
+      if (overflowed) return
       if (chunks.length === 0) {
         resolve({})
         return
@@ -55,7 +67,9 @@ function readJsonBody(req: IncomingMessage): Promise<unknown> {
         reject(new Error('invalid-json'))
       }
     })
-    req.on('error', reject)
+    req.on('error', (error) => {
+      if (!overflowed) reject(error)
+    })
   })
 }
 
@@ -95,91 +109,22 @@ function postRoute(path: string, run: (body: Record<string, unknown>) => Promise
   }
 }
 
-/** CORS headers applied to every room-family response (prototype: open relay). */
-const CORS_HEADERS = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type',
-} as const
-
-/** Answer a room-family request with CORS + JSON. */
-function roomJson(res: ServerResponse, status: number, body: unknown): void {
-  res.writeHead(status, {
-    'content-type': 'application/json; charset=utf-8',
-    ...CORS_HEADERS,
-  })
-  res.end(JSON.stringify(body))
-}
-
-/** Answer a room-family OPTIONS preflight. */
-function roomOptions(res: ServerResponse): void {
-  res.writeHead(204, CORS_HEADERS)
-  res.end()
-}
-
-/** Room-family prefix handler: <code>/state, <code>/members, <code>/members/<id>. */
-function roomPrefixHandler(service: GamesService): WebRoute {
+/** Adapter: mount the shared game-server handler as a CORS-open prefix route. */
+function sharedRoute(prefix: string, service: GamesService): WebRoute {
   return {
     kind: 'prefix',
-    path: ROOM_API_PREFIX,
+    path: prefix,
     handler: (req: IncomingMessage, res: ServerResponse): void | Promise<void> => {
-      if (req.method === 'OPTIONS') {
-        roomOptions(res)
-        return
-      }
-      const url = new URL(req.url ?? '/', 'http://localhost')
-      const rest = url.pathname.slice(ROOM_API_PREFIX.length).replace(/^\/+/, '').split('/').filter(Boolean)
-      const [code, action, memberId] = rest
-      if (code === undefined || /^[A-Za-z0-9]{1,8}$/.test(code) === false) {
-        roomJson(res, 404, { ok: false, error: 'room-not-found' })
-        return
-      }
-      if (action === 'state' && req.method === 'GET') {
-        const room = service.rooms().getRoom(code)
-        if (room === undefined) {
-          roomJson(res, 404, { ok: false, error: 'room-not-found' })
-          return
-        }
-        roomJson(res, 200, { ok: true, room })
-        return
-      }
-      if (action === 'members' && req.method === 'POST') {
-        return readJsonBody(req).then((body) => {
-          const record = (typeof body === 'object' && body !== null) ? body as Record<string, unknown> : {}
-          const member = (typeof record.member === 'object' && record.member !== null)
-            ? record.member as Record<string, unknown>
-            : {}
-          const report: MemberReport = {
-            memberId: typeof member.memberId === 'string' ? member.memberId : '',
-            nickname: typeof member.nickname === 'string' ? member.nickname : '',
-            tokens: typeof member.tokens === 'number' ? member.tokens : 0,
-            hats: typeof member.hats === 'number' ? member.hats : 0,
-            phase: typeof member.phase === 'string' ? member.phase : 'idle',
-          }
-          if (report.memberId === '' || report.memberId.length > 64) {
-            roomJson(res, 400, { ok: false, error: 'invalid-member' })
-            return
-          }
-          const room = service.rooms().upsertMember(code, report)
-          if (room === undefined) {
-            roomJson(res, 404, { ok: false, error: 'room-not-found' })
-            return
-          }
-          roomJson(res, 200, { ok: true, room })
-        }, (error) => {
-          roomJson(res, 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
-        })
-      }
-      if (action === 'members' && memberId !== undefined && req.method === 'DELETE') {
-        if (memberId.length === 0 || memberId.length > 64) {
-          roomJson(res, 400, { ok: false, error: 'invalid-member' })
-          return
-        }
-        const removed = service.rooms().removeMember(code, memberId)
-        roomJson(res, 200, { ok: true, removed })
-        return
-      }
-      roomJson(res, 404, { ok: false, error: 'route-not-found' })
+      const rules = defaultGameRules()
+      return handleGameServer(req, res, {
+        rooms: service.rooms(),
+        pets: service.pets(),
+        rules,
+        // The host's in-process mount enforces auth only when the plugin is
+        // configured with a token (same value the browser sends to the game
+        // server); '' keeps the local prototype open.
+        ...(service.authToken() !== '' ? { authToken: service.authToken() } : {}),
+      })
     },
   }
 }
@@ -203,16 +148,76 @@ export function makeGamesRoutes(service: GamesService): WebRoute[] {
       ...(typeof body.size === 'number' ? { size: body.size } : {}),
       ...(typeof body.right === 'number' ? { right: body.right } : {}),
       ...(typeof body.bottom === 'number' ? { bottom: body.bottom } : {}),
+      ...(typeof body.locked === 'boolean' ? { locked: body.locked } : {}),
     })),
     postRoute(`${GAMES_API_PREFIX}/config`, (body) => service.setConfig({
       ...(typeof body.nickname === 'string' ? { nickname: body.nickname } : {}),
+      ...(typeof body.crownTokenStep === 'number' ? { crownTokenStep: body.crownTokenStep } : {}),
       ...(typeof body.hatTokenStep === 'number' ? { hatTokenStep: body.hatTokenStep } : {}),
       ...(typeof body.enabled === 'boolean' ? { enabled: body.enabled } : {}),
+      ...(typeof body.petVariant === 'string' ? { petVariant: body.petVariant } : {}),
+      ...(typeof body.serverUrl === 'string' ? { serverUrl: body.serverUrl } : {}),
+      ...(typeof body.authToken === 'string' ? { authToken: body.authToken } : {}),
     })),
-    postRoute(`${ROOM_API_PREFIX}`, () => Promise.resolve({
-      ok: true,
-      room: service.rooms().createRoom(),
-    })),
-    roomPrefixHandler(service),
+    // POST sets the host mirror of the uploaded pet meta; DELETE (or POST
+    // with `pet: null`) clears it. One exact route, method-dispatched.
+    {
+      kind: 'exact',
+      path: `${GAMES_API_PREFIX}/pet-meta`,
+      handler: (req: IncomingMessage, res: ServerResponse): Promise<void> => {
+        if (req.method === 'DELETE') {
+          return service.setPetMeta(undefined).then(
+            (value) => json(res, 200, value),
+            (error) => {
+              json(res, 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
+            },
+          )
+        }
+        if (req.method !== 'POST') {
+          json(res, 405, { ok: false, error: 'method-not-allowed' })
+          return Promise.resolve()
+        }
+        return readJsonBody(req).then((body) => {
+          const record = (typeof body === 'object' && body !== null) ? body as Record<string, unknown> : {}
+          const pet = record.pet
+          if (pet === null || pet === undefined) return service.setPetMeta(undefined)
+          if (typeof pet !== 'object') return Promise.reject(new Error('invalid-pet-meta'))
+          const meta = pet as Record<string, unknown>
+          if (meta.ext !== 'png' && meta.ext !== 'gif') return Promise.reject(new Error('invalid-pet-meta'))
+          if (typeof meta.version !== 'number' || typeof meta.width !== 'number' || typeof meta.height !== 'number') {
+            return Promise.reject(new Error('invalid-pet-meta'))
+          }
+          return service.setPetMeta({
+            ext: meta.ext,
+            version: meta.version,
+            width: meta.width,
+            height: meta.height,
+          })
+        }).then(
+          (value) => json(res, 200, value),
+          (error) => {
+            json(res, 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
+          },
+        )
+      },
+    },
+    // The shared multiplayer surface: rooms + pets (CORS-open, same code as
+    // the standalone game server in Docker).
+    sharedRoute(ROOM_API_PREFIX, service),
+    sharedRoute(PET_API_PREFIX, service),
+    {
+      // The rule set the shared surface enforces (defaults on the host mount;
+      // the standalone server reads its config.json).
+      kind: 'exact',
+      path: RULES_API_PATH,
+      handler: (req: IncomingMessage, res: ServerResponse): void | Promise<void> => {
+        return handleGameServer(req, res, {
+          rooms: service.rooms(),
+          pets: service.pets(),
+          rules: defaultGameRules(),
+          ...(service.authToken() !== '' ? { authToken: service.authToken() } : {}),
+        })
+      },
+    },
   ]
 }

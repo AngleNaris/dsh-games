@@ -1,6 +1,6 @@
 {
   "name": "@linxin666/dsh-games",
-  "description": "DSH 趣味编程插件（技术原型）：桌面宠物（DeepSeek logo）+ 昵称 + 多人房间，宠物随 token 用量长帽子（每 100M token 一顶，可配置）",
+  "description": "DSH 趣味编程插件：桌面宠物（DeepSeek 鲸鱼/自定义图案）+ 王冠成长（每 100M token 一顶青铜王冠，10 合 1 升级，魔法王冠带附魔特效）+ 多人房间（公开/邀请制 + 房间列表 + 自动回房）+ 可 Docker 部署的独立游戏服务器",
   "version": "0.1.0",
   "type": "module",
   "packageManager": "pnpm@11.20.0",
@@ -10,7 +10,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsdown",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "server": "node lib/server.js"
+  },
+  "bin": {
+    "dsh-games-server": "./lib/server.js"
   },
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

@@ -46,6 +46,26 @@ const nodeHalf: UserConfig = {
   ],
 }
 
+/**
+ * The standalone game server bundle — zero runtime dependencies (node
+ * builtins only), so the Docker image ships just this file.
+ */
+const serverHalf: UserConfig = {
+  name: `${PACKAGE_ID}/server`,
+  entry: { server: 'src/server-entry.ts' },
+  outDir: 'lib',
+  format: ['esm'],
+  platform: 'node',
+  target: 'es2024',
+  fixedExtension: false,
+  dts: false,
+  clean: false,
+  banner: '#!/usr/bin/env node',
+  // Nothing external to resolve: rooms / pets / gameserver / persist are all
+  // in-repo modules, and node builtins stay external automatically.
+  external: [],
+}
+
 const clientHalf: UserConfig = {
   name: `${PACKAGE_ID}/client`,
   entry: { client: 'src/client/index.ts' },
@@ -72,4 +92,4 @@ const clientHalf: UserConfig = {
   },
 }
 
-export default [nodeHalf, clientHalf]
+export default [nodeHalf, serverHalf, clientHalf]

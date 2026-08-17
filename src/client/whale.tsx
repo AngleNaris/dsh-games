@@ -19,13 +19,38 @@ function nextGradientId(): string {
   return `dsg-whale-${gradientCounter}`
 }
 
-/** The DeepSeek whale mark with the brand blue gradient. */
+/** Built-in pet pattern variants (the whale mark recolored). */
+export interface PetVariant {
+  id: string
+  /** Locale key base for the variant name. */
+  nameKey: string
+  from: string
+  to: string
+}
+
+export const PET_VARIANTS: readonly PetVariant[] = [
+  { id: 'default', nameKey: 'petVariant.default', from: '#6d8bff', to: '#4d6bfe' },
+  { id: 'crimson', nameKey: 'petVariant.crimson', from: '#ff8a80', to: '#e53935' },
+  { id: 'emerald', nameKey: 'petVariant.emerald', from: '#5eead4', to: '#0d9488' },
+  { id: 'gold', nameKey: 'petVariant.gold', from: '#ffe082', to: '#f59e0b' },
+  { id: 'violet', nameKey: 'petVariant.violet', from: '#c4b5fd', to: '#7c3aed' },
+  { id: 'ocean', nameKey: 'petVariant.ocean', from: '#67e8f9', to: '#0284c7' },
+] as const
+
+/** Resolve a variant id (unknown ids fall back to the default pattern). */
+export function petVariantOf(id: string | undefined): PetVariant {
+  return PET_VARIANTS.find((variant) => variant.id === id) ?? PET_VARIANTS[0]
+}
+
+/** The DeepSeek whale mark in the chosen pattern variant. */
 export function DeepSeekWhale(props: {
   size: number
   style?: CSSProperties
   title?: string
+  variant?: string
 }): ReactElement {
   const id = nextGradientId()
+  const variant = petVariantOf(props.variant)
   return (
     <svg
       viewBox="0 0 50 50"
@@ -37,8 +62,8 @@ export function DeepSeekWhale(props: {
     >
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#6d8bff" />
-          <stop offset="100%" stopColor="#4d6bfe" />
+          <stop offset="0%" stopColor={variant.from} />
+          <stop offset="100%" stopColor={variant.to} />
         </linearGradient>
       </defs>
       <path d={WHALE_PATH} fill={`url(#${id})`} />

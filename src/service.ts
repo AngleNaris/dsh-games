@@ -8,6 +8,7 @@
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import type { Session } from '@deepseek-ai/dsh-session'
+import { join } from 'node:path'
 import {
   countStepUsage,
   StepMemo,
@@ -15,7 +16,12 @@ import {
   type UsageLike,
 } from './ledger.ts'
 import {
-  DEFAULT_HAT_TOKEN_STEP,
+  crownCounts,
+  crownUnits,
+  DEFAULT_CROWN_BASE,
+  DEFAULT_CROWN_TOKEN_STEP,
+} from './crowns.ts'
+import {
   DEFAULT_NICKNAME,
   DISPLAY_INSET_MAX,
   DISPLAY_SIZE_MAX,
@@ -23,9 +29,11 @@ import {
   gamesHomeDir,
   loadGamesPersist,
   NICKNAME_MAX_LENGTH,
+  PETS_DIR,
   saveGamesPersist,
   type GamesDisplayConfig,
   type GamesPersist,
+  type PetMeta,
 } from './persist.ts'
 import {
   normalizePhase,
@@ -33,6 +41,7 @@ import {
   type MemberPhase,
   type RoomStoreOptions,
 } from './rooms.ts'
+import { PetStore } from './pets.ts'
 
 /** Settings-section shape the web settings surface edits. */
 export interface GamesSection {
@@ -40,8 +49,14 @@ export interface GamesSection {
   enabled?: boolean
   /** Player nickname shown on the pet and in rooms. */
   nickname: string
-  /** Tokens per hat. */
-  hatTokenStep: number
+  /** Tokens per bronze crown (host fallback; the game server rules win). */
+  crownTokenStep: number
+  /** Built-in pet pattern variant id. */
+  petVariant: string
+  /** Game-server base URL ('' = same-origin in-process mount). */
+  serverUrl: string
+  /** Shared secret for the game server (?token=…), '' = open. */
+  authToken: string
 }
 
 /** Plugin configuration. */
@@ -50,8 +65,16 @@ export interface GamesConfig extends RoomStoreOptions {
   enabled?: boolean
   /** Default nickname (settings override when the surface is attached). */
   nickname?: string
-  /** Tokens per hat (settings override when the surface is attached). */
+  /** Tokens per crown (settings override when the surface is attached). */
+  crownTokenStep?: number
+  /** Legacy settings key for tokens per crown. */
   hatTokenStep?: number
+  /** Default pet pattern variant. */
+  petVariant?: string
+  /** Default game-server base URL. */
+  serverUrl?: string
+  /** Default game-server shared secret ('' = open). */
+  authToken?: string
   /** Persistence directory override (defaults to $DSH_HOME). */
   persistDir?: string
 }
@@ -64,14 +87,24 @@ export interface GamesStateView {
   nickname: string
   /** Lifetime usage tokens. */
   tokens: number
-  /** Hat count (tokens / hatTokenStep, floored). */
-  hats: number
+  /** Crown units (tokens / crownTokenStep, floored). */
+  crownUnits: number
+  /** Crown counts per level, lowest first (see crowns.ts). */
+  crowns: number[]
   /** Current model-activity phase. */
   phase: MemberPhase
-  /** Tokens per hat in effect. */
-  hatTokenStep: number
+  /** Tokens per crown in effect (host fallback; server rules win). */
+  crownTokenStep: number
   /** Master switch (false hides the pet and stops counting). */
   enabled: boolean
+  /** Built-in pet pattern variant in effect. */
+  petVariant: string
+  /** Game-server base URL ('' = same-origin). */
+  serverUrl: string
+  /** Game-server shared secret ('' = open server). */
+  authToken: string
+  /** Uploaded custom pet image meta, when set. */
+  pet?: PetMeta | undefined
   /** Server clock (ms epoch), for client-side staleness math. */
   serverTime: number
   /** Floating-pet display layout. */
@@ -85,7 +118,8 @@ export type SetNicknameResult = { ok: true; nickname: string } | { ok: false; er
 export interface BoostResult {
   ok: true
   tokens: number
-  hats: number
+  crownUnits: number
+  crowns: number[]
 }
 
 /** Result of `games.setDisplay`. */
@@ -97,12 +131,19 @@ export interface SetDisplayResult {
 /** Runtime-config patch accepted by `games.setConfig`. */
 export interface GamesConfigPatch {
   nickname?: string
+  crownTokenStep?: number
   hatTokenStep?: number
   enabled?: boolean
+  petVariant?: string
+  serverUrl?: string
+  authToken?: string
 }
 
 /** Result of `games.setConfig`. */
 export type SetConfigResult = { ok: true } | { ok: false; error: string }
+
+/** Result of `games.setPetMeta`. */
+export type SetPetMetaResult = { ok: true; pet?: PetMeta } | { ok: false; error: string }
 
 /** Settings namespace of the games capability (spelled here, mirrored in the browser half). */
 export const GAMES_SETTINGS_NAMESPACE = 'games'
@@ -119,6 +160,9 @@ interface BusEvent {
 /** Known model-activity phases (the set the harness activity tracker emits). */
 const ACTIVITY_PHASES: readonly string[] = ['idle', 'waiting', 'thinking', 'tool', 'done']
 
+/** Default pet pattern variant. */
+export const DEFAULT_PET_VARIANT = 'default'
+
 /**
  * Cordis service exposing the games RPC domain. Token counting is live-only:
  * the `session/event` firehose never replays constructor seeds, and the
@@ -131,7 +175,11 @@ export class GamesService extends Service {
   private persist: GamesPersist
   private readonly memo = new StepMemo()
   private readonly roomStore: RoomStore
-  private readonly hatTokenStepDefault: number
+  private readonly petStore: PetStore
+  private readonly crownTokenStepDefault: number
+  private readonly petVariantDefault: string
+  private readonly serverUrlDefault: string
+  private readonly authTokenDefault: string
   private sectionSource: (() => GamesSection) | undefined
   private phase: MemberPhase = 'idle'
   private enabled: boolean
@@ -143,9 +191,17 @@ export class GamesService extends Service {
     this.persistDir = config.persistDir ?? gamesHomeDir()
     this.persist = loadGamesPersist(this.persistDir)
     this.roomStore = new RoomStore(config)
-    this.hatTokenStepDefault = config.hatTokenStep ?? DEFAULT_HAT_TOKEN_STEP
+    this.petStore = new PetStore(this.petDir())
+    this.crownTokenStepDefault = config.crownTokenStep ?? config.hatTokenStep ?? DEFAULT_CROWN_TOKEN_STEP
+    this.petVariantDefault = config.petVariant ?? DEFAULT_PET_VARIANT
+    this.serverUrlDefault = typeof config.serverUrl === 'string' ? config.serverUrl.trim() : ''
+    this.authTokenDefault = typeof config.authToken === 'string' ? config.authToken.trim() : ''
     this.enabled = config.enabled ?? true
     this.setEnabled(this.enabled)
+  }
+
+  private petDir(): string {
+    return join(this.persistDir, PETS_DIR)
   }
 
   /** Point the service at the authoritative settings section (set by index.ts). */
@@ -199,7 +255,10 @@ export class GamesService extends Service {
   private section(): GamesSection {
     return this.sectionSource?.() ?? {
       nickname: this.persist.nickname,
-      hatTokenStep: this.hatTokenStepDefault,
+      crownTokenStep: this.crownTokenStepDefault,
+      petVariant: this.petVariantDefault,
+      serverUrl: this.serverUrlDefault,
+      authToken: this.authTokenDefault,
     }
   }
 
@@ -261,10 +320,10 @@ export class GamesService extends Service {
   }
 
   /**
-   * RPC: apply a runtime-config patch (nickname / hatTokenStep / enabled).
-   * Values are mirrored into the `games` settings namespace so the web
-   * settings surface stays consistent; when the settings provider is absent
-   * the patch still applies locally.
+   * RPC: apply a runtime-config patch (nickname / crownTokenStep / enabled /
+   * petVariant / serverUrl). Values are mirrored into the `games` settings
+   * namespace so the web settings surface stays consistent; when the settings
+   * provider is absent the patch still applies locally.
    */
   async setConfig(patch: GamesConfigPatch): Promise<SetConfigResult> {
     const settingsPatch: Record<string, unknown> = {}
@@ -276,17 +335,32 @@ export class GamesService extends Service {
       this.flush()
       settingsPatch.nickname = trimmed
     }
-    if (patch.hatTokenStep !== undefined) {
-      const step = Math.round(patch.hatTokenStep)
-      if (!Number.isFinite(step) || step < 1 || step > 1_000_000_000_000) {
-        return { ok: false, error: 'invalid-hat-token-step' }
+    const step = patch.crownTokenStep ?? patch.hatTokenStep
+    if (step !== undefined) {
+      const rounded = Math.round(step)
+      if (!Number.isFinite(rounded) || rounded < 1 || rounded > 1_000_000_000_000) {
+        return { ok: false, error: 'invalid-crown-token-step' }
       }
-      settingsPatch.hatTokenStep = step
+      settingsPatch.crownTokenStep = rounded
     }
     if (patch.enabled !== undefined) {
       if (typeof patch.enabled !== 'boolean') return { ok: false, error: 'invalid-enabled' }
       settingsPatch.enabled = patch.enabled
       this.setEnabled(patch.enabled)
+    }
+    if (patch.petVariant !== undefined) {
+      if (typeof patch.petVariant !== 'string' || patch.petVariant.trim() === '') {
+        return { ok: false, error: 'invalid-pet-variant' }
+      }
+      settingsPatch.petVariant = patch.petVariant.trim()
+    }
+    if (patch.serverUrl !== undefined) {
+      if (typeof patch.serverUrl !== 'string') return { ok: false, error: 'invalid-server-url' }
+      settingsPatch.serverUrl = patch.serverUrl.trim()
+    }
+    if (patch.authToken !== undefined) {
+      if (typeof patch.authToken !== 'string') return { ok: false, error: 'invalid-auth-token' }
+      settingsPatch.authToken = patch.authToken.trim()
     }
     if (Object.keys(settingsPatch).length > 0) this.mirrorSettings(settingsPatch)
     return { ok: true }
@@ -297,14 +371,14 @@ export class GamesService extends Service {
     return this.persist.nickname
   }
 
-  /** RPC: demo helper — add tokens to the ledger and recompute hats. */
+  /** RPC: demo helper — add tokens to the ledger and recompute crowns. */
   async boost(tokens: number): Promise<BoostResult> {
     const delta = Number.isFinite(tokens) && tokens > 0 ? Math.round(tokens) : 0
     if (delta <= 0) throw new Error('invalid-boost')
     this.persist = { ...this.persist, tokens: this.persist.tokens + delta }
     this.flush()
     const view = this.view()
-    return { ok: true, tokens: view.tokens, hats: view.hats }
+    return { ok: true, tokens: view.tokens, crownUnits: view.crownUnits, crowns: view.crowns }
   }
 
   /** RPC: update display layout (clamped to whole pixels). */
@@ -313,9 +387,30 @@ export class GamesService extends Service {
     next.size = Math.round(Math.min(DISPLAY_SIZE_MAX, Math.max(DISPLAY_SIZE_MIN, next.size)))
     next.right = Math.round(Math.min(DISPLAY_INSET_MAX, Math.max(0, next.right)))
     next.bottom = Math.round(Math.min(DISPLAY_INSET_MAX, Math.max(0, next.bottom)))
+    next.locked = patch.locked !== undefined ? patch.locked : this.persist.display.locked
     this.persist = { ...this.persist, display: next }
     this.flush()
     return { ok: true, display: this.persist.display }
+  }
+
+  /**
+   * RPC: record the uploaded custom-pet meta (the bytes live on the game
+   * server; the host only mirrors the meta so state can rebuild the URL).
+   */
+  async setPetMeta(meta: PetMeta | undefined): Promise<SetPetMetaResult> {
+    if (meta !== undefined) {
+      if (meta.ext !== 'png' && meta.ext !== 'gif') return { ok: false, error: 'invalid-pet-meta' }
+      if (!Number.isFinite(meta.version) || !Number.isFinite(meta.width) || !Number.isFinite(meta.height)) {
+        return { ok: false, error: 'invalid-pet-meta' }
+      }
+      this.persist = { ...this.persist, pet: meta }
+    } else {
+      const next = { ...this.persist }
+      delete next.pet
+      this.persist = next
+    }
+    this.flush()
+    return { ok: true, pet: this.persist.pet }
   }
 
   /** The room store (routes call into it). */
@@ -323,17 +418,33 @@ export class GamesService extends Service {
     return this.roomStore
   }
 
+  /** The pet store (routes mount it under the shared game-server surface). */
+  pets(): PetStore {
+    return this.petStore
+  }
+
+  /** The configured shared secret ('' = the surface stays open). */
+  authToken(): string {
+    return this.section().authToken ?? this.authTokenDefault
+  }
+
   private view(): GamesStateView {
     const section = this.section()
-    const hatTokenStep = Math.max(1, Math.round(section.hatTokenStep ?? this.hatTokenStepDefault))
+    const crownTokenStep = Math.max(1, Math.round(section.crownTokenStep ?? this.crownTokenStepDefault))
+    const units = crownUnits(this.persist.tokens, crownTokenStep)
     return {
       memberId: this.persist.memberId,
       nickname: section.nickname?.trim() !== '' ? section.nickname : DEFAULT_NICKNAME,
       tokens: this.persist.tokens,
-      hats: Math.floor(this.persist.tokens / hatTokenStep),
+      crownUnits: units,
+      crowns: crownCounts(units, DEFAULT_CROWN_BASE),
       phase: this.phase,
-      hatTokenStep,
+      crownTokenStep,
       enabled: this.enabled,
+      petVariant: section.petVariant ?? this.petVariantDefault,
+      serverUrl: section.serverUrl ?? this.serverUrlDefault,
+      authToken: section.authToken ?? this.authTokenDefault,
+      ...(this.persist.pet !== undefined ? { pet: this.persist.pet } : {}),
       serverTime: Date.now(),
       display: { ...this.persist.display },
     }

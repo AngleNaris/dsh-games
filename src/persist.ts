@@ -23,6 +23,20 @@ export interface GamesDisplayConfig {
   size: number
   right: number
   bottom: number
+  /** True pins the pet in place (drag disabled). */
+  locked: boolean
+}
+
+/** Meta of a user-uploaded custom pet image (the bytes live in pets/). */
+export interface PetMeta {
+  /** File extension derived from the validated magic bytes. */
+  ext: 'png' | 'gif'
+  /** Upload timestamp — cache-busting version for room sync. */
+  version: number
+  /** Decoded image width (px). */
+  width: number
+  /** Decoded image height (px). */
+  height: number
 }
 
 /** Everything persisted for the games plugin. */
@@ -36,6 +50,8 @@ export interface GamesPersist {
   /** Per-session last-counted (turn, step) — restart-safe dedupe. */
   frontiers: Record<string, StepFrontier>
   display: GamesDisplayConfig
+  /** Uploaded custom pet image, if any. */
+  pet?: PetMeta | undefined
 }
 
 /** Default pet nickname until the user sets one. */
@@ -50,16 +66,24 @@ export const DEFAULT_HAT_TOKEN_STEP = 100_000_000
 /** Persisted file name. */
 export const GAMES_FILE = 'games.json'
 
-export const DISPLAY_SIZE_MIN = 48
+export const DISPLAY_SIZE_MIN = 24
 export const DISPLAY_SIZE_MAX = 512
 export const DISPLAY_INSET_MAX = 10_000
 
 export const defaultDisplayConfig: GamesDisplayConfig = {
   visible: true,
-  size: 160,
+  size: 60,
   right: 24,
   bottom: 20,
+  locked: false,
 }
+
+/** File name of the pets directory under the persist dir. */
+export const PETS_DIR = 'pets'
+
+/** Upload limits for custom pet images. */
+export const PET_MAX_BYTES = 2 * 1024 * 1024
+export const PET_MAX_DIMENSION = 1024
 
 /** Resolve the persistence directory ($DSH_HOME or ~/.dsh). */
 export function gamesHomeDir(): string {
@@ -98,7 +122,20 @@ export function loadGamesPersist(dir: string = gamesHomeDir()): GamesPersist {
         || base.display.size),
       right: Math.round(clamp(finiteNum(rawDisplay.right, base.display.right), DISPLAY_INSET_MAX)),
       bottom: Math.round(clamp(finiteNum(rawDisplay.bottom, base.display.bottom), DISPLAY_INSET_MAX)),
+      locked: typeof rawDisplay.locked === 'boolean' ? rawDisplay.locked : base.display.locked,
     }
+    const rawPet = (parsed.pet ?? undefined) as Partial<PetMeta> | undefined
+    const pet: PetMeta | undefined = rawPet !== undefined
+      && (rawPet.ext === 'png' || rawPet.ext === 'gif')
+      && typeof rawPet.version === 'number' && Number.isFinite(rawPet.version)
+      && typeof rawPet.width === 'number' && typeof rawPet.height === 'number'
+      ? {
+          ext: rawPet.ext,
+          version: Math.round(rawPet.version),
+          width: Math.round(rawPet.width),
+          height: Math.round(rawPet.height),
+        }
+      : undefined
     const rawFrontiers = (parsed.frontiers ?? {}) as Record<string, unknown>
     const frontiers: Record<string, StepFrontier> = {}
     for (const [sessionId, value] of Object.entries(rawFrontiers)) {
@@ -119,6 +156,7 @@ export function loadGamesPersist(dir: string = gamesHomeDir()): GamesPersist {
       tokens: Math.max(0, Math.round(finiteNum(parsed.tokens, 0))),
       frontiers,
       display,
+      ...(pet !== undefined ? { pet } : {}),
     }
   } catch {
     return emptyPersist()
