@@ -6,4 +6,4 @@
 # hats, nickname + room UI, settings card).
 - insert:
     - id: games
-      name: '@linxin666/dsh-games'
+      name: '@anglenaris/dsh-games'

@@ -2,7 +2,7 @@
  * Room panel — browse the game server's public rooms, create a room (public
  * or invite-only), join by code, leave, and list members with their pets
  * (custom pet image or mini whale) + crowns + nickname + token count + phase.
- * @module @linxin666/dsh-games/client/RoomPanel
+ * @module @anglenaris/dsh-games/client/RoomPanel
  */
 
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'

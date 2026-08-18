@@ -5,7 +5,7 @@
  * hats, the nickname + room UI, and the settings card. Install via
  * `dsh plugin --profile web add link:<this repo>`; cordis.patch.yml inserts
  * this plugin row.
- * @module @linxin666/dsh-games
+ * @module @anglenaris/dsh-games
  */
 
 import { Context } from '@deepseek-ai/cordis'

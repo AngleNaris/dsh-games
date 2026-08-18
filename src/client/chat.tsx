@@ -3,7 +3,7 @@
  * the floating message bubble that pops from a pet for a few seconds. Chat
  * lives in the room protocol: messages are posted to the game server and
  * delivered to every client through the 3s room heartbeat.
- * @module @linxin666/dsh-games/client/chat
+ * @module @anglenaris/dsh-games/client/chat
  */
 
 import type { ReactElement } from 'react'

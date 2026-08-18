@@ -122,10 +122,10 @@ compose 与 package 元数据 → 不使用 `--delete` 地同步到服务器 →
 
 ### 使用 GitHub Release 安装包（推荐）
 
-从 GitHub Release 下载 `linxin666-dsh-games-<版本>.tgz`，复制到目标电脑后执行：
+从 GitHub Release 下载 `anglenaris-dsh-games-<版本>.tgz`，复制到目标电脑后执行：
 
 ```powershell
-dsh plugin --profile web add "D:\Downloads\linxin666-dsh-games-0.1.0.tgz"
+dsh plugin --profile web add "D:\Downloads\anglenaris-dsh-games-0.1.1.tgz"
 dsh web
 ```
 
@@ -133,7 +133,7 @@ dsh web
 升级时安装新版本的 `.tgz` 并重启 `dsh web`；卸载命令：
 
 ```powershell
-dsh plugin --profile web remove @linxin666/dsh-games
+dsh plugin --profile web remove @anglenaris/dsh-games
 ```
 
 ### 从源码安装

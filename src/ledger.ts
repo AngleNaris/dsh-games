@@ -13,7 +13,7 @@
  *    second report merges only the positive delta (totals never shrink), and
  *    the memo is bounded (LRU-ish eviction) because old live events are never
  *    re-emitted.
- * @module @linxin666/dsh-games/ledger
+ * @module @anglenaris/dsh-games/ledger
  */
 
 /** Provider-reported token accounting (subset of dsh-llm TokenUsage). */

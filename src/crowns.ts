@@ -28,7 +28,7 @@
  * bottom-up pile (a display layer must be full before the one above starts)
  * — placement is a rendering concern, the ladder itself is unchanged.
  * Shared by the host service and the browser half.
- * @module @linxin666/dsh-games/crowns
+ * @module @anglenaris/dsh-games/crowns
  */
 
 /** One crown tier. */

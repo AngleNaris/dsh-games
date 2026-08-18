@@ -4,7 +4,7 @@
  * owns these bytes; validation is strict: PNG/GIF magic bytes, decoded pixel
  * dimensions, and a hard size cap. Files land in `<dir>/pets/<memberId>.<ext>`
  * with atomic rename writes.
- * @module @linxin666/dsh-games/pets
+ * @module @anglenaris/dsh-games/pets
  */
 
 import { mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'

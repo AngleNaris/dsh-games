@@ -6,10 +6,10 @@
  *
  * Floating surfaces use the same semantic layer, label, and border tokens as
  * the surrounding DSH theme so light and dark appearances stay consistent.
- * @module @linxin666/dsh-games/client/styles
+ * @module @anglenaris/dsh-games/client/styles
  */
 
-export const STYLE_TAG_ID = '@linxin666/dsh-games/styles'
+export const STYLE_TAG_ID = '@anglenaris/dsh-games/styles'
 
 export const CSS = `
 .dsg-pet-root {

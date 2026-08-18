@@ -9,7 +9,7 @@
  * The pet surface lives inside a `ctx.effect` with a full cleanup: on HMR
  * reload the old root unmounts instead of stacking a second overlapping pet
  * (the module re-apply used to leave the old root mounted on document.body).
- * @module @linxin666/dsh-games/client
+ * @module @anglenaris/dsh-games/client
  */
 
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'

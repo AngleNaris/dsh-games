@@ -3,7 +3,7 @@
  * ~/.dsh) as `games.json`: the member identity, the lifetime token ledger
  * totals, the per-session dedupe frontiers, and the pet display layout.
  * Deliberately minimal: one file, atomic rename write, tolerant read.
- * @module @linxin666/dsh-games/persist
+ * @module @anglenaris/dsh-games/persist
  */
 
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'

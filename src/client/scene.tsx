@@ -10,7 +10,7 @@
  * - `column` — vertical line centered on the anchor pet.
  * - `grid`   — free drag, but positions snap to the spacing grid.
  * - `orbit`  — ring around the anchor pet.
- * @module @linxin666/dsh-games/client/scene
+ * @module @anglenaris/dsh-games/client/scene
  */
 
 import {

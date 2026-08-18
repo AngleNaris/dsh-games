@@ -3,7 +3,7 @@
  * ledger (folded from live session events), the pet phase mirror, the
  * display layout, and the in-memory room store. The API gateway maps this
  * service onto the `/api/games/*` HTTP routes for browser consumers.
- * @module @linxin666/dsh-games/service
+ * @module @anglenaris/dsh-games/service
  */
 
 import { Context, Service } from '@deepseek-ai/cordis'

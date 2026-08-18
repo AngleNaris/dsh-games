@@ -21,7 +21,7 @@
  *
  * Everything is CORS-open (`*`) so any DSH instance's browser may talk to any
  * game server it holds the token for.
- * @module @linxin666/dsh-games/gameserver
+ * @module @anglenaris/dsh-games/gameserver
  */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'

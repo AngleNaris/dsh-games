@@ -14,7 +14,7 @@
  *
  * Deploy: `docker compose up -d --build` (see Dockerfile) or
  * `node lib/server.js` on any node >= 22 host.
- * @module @linxin666/dsh-games/server
+ * @module @anglenaris/dsh-games/server
  */
 
 import { createServer } from 'node:http'

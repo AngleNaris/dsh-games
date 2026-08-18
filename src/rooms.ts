@@ -6,7 +6,7 @@
  *
  * Rooms are either **public** (listed on the host's room list, anyone can
  * join) or **invite-only** (joinable only by code, invisible in the list).
- * @module @linxin666/dsh-games/rooms
+ * @module @anglenaris/dsh-games/rooms
  */
 
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'

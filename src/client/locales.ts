@@ -1,6 +1,6 @@
 /**
  * dsh-games locale dictionaries (zh/en).
- * @module @linxin666/dsh-games/client/locales
+ * @module @anglenaris/dsh-games/client/locales
  */
 
 /** Dictionary namespace this package registers. */
