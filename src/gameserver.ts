@@ -350,7 +350,6 @@ function memberReportOf(body: unknown): MemberReport {
     petUrl: typeof member.petUrl === 'string' ? member.petUrl : undefined,
     petVersion: typeof member.petVersion === 'number' ? member.petVersion : undefined,
     petVariant: typeof member.petVariant === 'string' ? member.petVariant : undefined,
-    size: typeof member.size === 'number' ? member.size : undefined,
   }
 }
 

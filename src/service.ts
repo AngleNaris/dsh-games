@@ -198,16 +198,6 @@ export class GamesService extends Service {
     super(ctx, 'games')
     this.persistDir = config.persistDir ?? gamesHomeDir()
     this.persist = loadGamesPersist(this.persistDir)
-    const rules = defaultGameRules()
-    this.roomStore = new RoomStore({
-      ...config,
-      antiCheat: new AntiCheatGuard({
-        rules: rules.crown,
-        policy: normalizeAntiCheatPolicy(undefined),
-        stateFile: join(this.persistDir, 'anticheat.json'),
-      }),
-    })
-    this.petStore = new PetStore(this.petDir())
     this.crownTokenStepDefault = config.crownTokenStep ?? config.hatTokenStep ?? DEFAULT_CROWN_TOKEN_STEP
     this.petVariantDefault = config.petVariant ?? DEFAULT_PET_VARIANT
     this.serverUrlDefault = typeof config.serverUrl === 'string'
@@ -216,6 +206,15 @@ export class GamesService extends Service {
     this.authTokenDefault = typeof config.authToken === 'string'
       ? config.authToken.trim()
       : DEFAULT_GAME_SERVER_AUTH_TOKEN
+    this.roomStore = new RoomStore({
+      ...config,
+      antiCheat: new AntiCheatGuard({
+        rules: () => this.gameRules().crown,
+        policy: normalizeAntiCheatPolicy(undefined),
+        stateFile: join(this.persistDir, 'anticheat.json'),
+      }),
+    })
+    this.petStore = new PetStore(this.petDir())
     this.enabled = config.enabled ?? true
     this.setEnabled(this.enabled)
   }
@@ -475,9 +474,20 @@ export class GamesService extends Service {
     return this.section().authToken ?? this.authTokenDefault
   }
 
+  /** Rules enforced by the host-mounted room server and shown to its client. */
+  gameRules(): ReturnType<typeof defaultGameRules> {
+    const rules = defaultGameRules()
+    const section = this.section()
+    rules.crown.tokenStep = Math.max(
+      1,
+      Math.round(section.crownTokenStep ?? this.crownTokenStepDefault),
+    )
+    return rules
+  }
+
   private view(): GamesStateView {
     const section = this.section()
-    const crownTokenStep = Math.max(1, Math.round(section.crownTokenStep ?? this.crownTokenStepDefault))
+    const crownTokenStep = this.gameRules().crown.tokenStep
     const units = crownUnits(this.persist.tokens, crownTokenStep)
     return {
       memberId: this.persist.memberId,

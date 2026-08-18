@@ -50,8 +50,34 @@ try {
   page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()) })
   page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`))
 
+  const dismissHostModals = async () => {
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const mask = page.locator('._mask_15u5s_14').first()
+      if (await mask.count() === 0) return
+      const root = mask.locator('xpath=ancestor::div[contains(@class,"_root_15u5s_2")]')
+      const buttons = root.locator('button')
+      const count = await buttons.count()
+      if (count === 0) {
+        await page.keyboard.press('Escape')
+      } else {
+        let clicked = false
+        for (let index = 0; index < count; index += 1) {
+          const button = buttons.nth(index)
+          if (await button.isEnabled().catch(() => false)) {
+            await button.click({ timeout: 3_000 }).catch(() => {})
+            clicked = true
+            break
+          }
+        }
+        if (!clicked) await buttons.last().click({ force: true, timeout: 3_000 }).catch(() => {})
+      }
+      await page.waitForTimeout(600)
+    }
+  }
+
   await page.goto(A, { waitUntil: 'networkidle' })
   await page.waitForSelector('[data-testid="games-pet"]', { timeout: 20_000 })
+  await dismissHostModals()
   const clickPet = async () => {
     await page.locator('[data-testid="games-pet"]').evaluate((element) => {
       if (!(element instanceof HTMLElement)) throw new Error('pet trigger is not an HTMLElement')
@@ -113,6 +139,7 @@ try {
 
   // The joined-room information block, copy action, and arrangement controls
   // must all resolve to dark theme surfaces rather than gray-white fills.
+  await dismissHostModals()
   await page.click('[data-testid="games-room-create"]')
   const joinedRoom = page.locator('[data-testid="games-room-joined"]')
   await joinedRoom.waitFor({ state: 'visible' })

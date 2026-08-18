@@ -43,6 +43,8 @@ export interface ScenePrefs {
   mode: ArrangeMode
   /** Gap between pet edges (grid cell too), px. */
   spacing: number
+  /** Whether every room member label remains visible without hover. */
+  showLabels: boolean
   /** Free positions keyed by member id. */
   free: Record<string, PetPos>
 }
@@ -67,16 +69,10 @@ export interface SceneViewport {
 /** Spacing slider bounds. */
 export const SCENE_SPACING_MIN = 24
 export const SCENE_SPACING_MAX = 240
-export const SCENE_SPACING_DEFAULT = 110
+export const SCENE_SPACING_DEFAULT = 24
 
 /** localStorage key for the scene prefs. */
-const SCENE_KEY = 'dsh.games.scene.v1'
-
-/** Clamp a member-reported size into the legal pet range. */
-export function clampMemberSize(size: number | undefined, fallback: number): number {
-  const value = typeof size === 'number' && Number.isFinite(size) ? size : fallback
-  return Math.min(512, Math.max(24, Math.round(value)))
-}
+export const SCENE_KEY = 'dsh.games.scene.v2'
 
 /** Snap a position to the spacing grid (grid mode). */
 export function snapPos(pos: PetPos, spacing: number): PetPos {
@@ -211,7 +207,12 @@ function clampAll(
 
 /** Tolerant load of the scene prefs (corrupt storage falls back to defaults). */
 export function loadScenePrefs(): ScenePrefs {
-  const base: ScenePrefs = { mode: 'free', spacing: SCENE_SPACING_DEFAULT, free: {} }
+  const base: ScenePrefs = {
+    mode: 'row',
+    spacing: SCENE_SPACING_DEFAULT,
+    showLabels: true,
+    free: {},
+  }
   try {
     const raw = localStorage.getItem(SCENE_KEY)
     if (raw === null) return base
@@ -233,7 +234,8 @@ export function loadScenePrefs(): ScenePrefs {
         }
       }
     }
-    return { mode, spacing, free }
+    const showLabels = typeof parsed.showLabels === 'boolean' ? parsed.showLabels : base.showLabels
+    return { mode, spacing, showLabels, free }
   } catch {
     return base
   }
@@ -279,10 +281,12 @@ export function MemberPetScene(props: {
   /** False in auto-arrange modes: the layout owns the position. */
   draggable: boolean
   onMove: (pos: PetPos) => void
+  /** Local observer preference; never synchronized through room state. */
+  showLabel: boolean
   /** Incoming chat bubble (null when none). */
   chat?: { text: string; key: string; leaving?: boolean } | null
 }): ReactElement {
-  const { member, size, pos, draggable, onMove, chat } = props
+  const { member, size, pos, draggable, onMove, showLabel, chat } = props
   const dragRef = useRef<{ startX: number; startY: number; right: number; bottom: number } | null>(null)
 
   const onPointerDown = (event: React.PointerEvent): void => {
@@ -324,6 +328,7 @@ export function MemberPetScene(props: {
         data-active={active}
         data-phase={member.phase}
         data-token-active={member.active === true}
+        data-show-label={showLabel}
         title={label}
         aria-label={label}
         onPointerDown={onPointerDown}
@@ -397,6 +402,17 @@ export function SceneControls(props: {
         <button type="button" className="dsg-btn-ghost" onClick={onReset} data-testid="games-scene-reset">
           {t('scene.reset')}
         </button>
+      </div>
+      <div className="dsg-field-row" style={{ marginTop: 8 }}>
+        <label>{t('scene.showLabels')}</label>
+        <button
+          type="button"
+          className="dsg-toggle"
+          data-on={prefs.showLabels}
+          aria-pressed={prefs.showLabels}
+          onClick={() => onChange({ showLabels: !prefs.showLabels })}
+          data-testid="games-scene-label-toggle"
+        />
       </div>
     </div>
   )

@@ -24,6 +24,10 @@ import { createRoot } from 'react-dom/client'
 import { GamesApp } from './GamesApp.tsx'
 import { GamesSettingsCard } from './SettingsCard.tsx'
 import { en, NS, t, zh } from './locales.ts'
+import {
+  GAMES_SETTINGS_SLOT,
+  LEGACY_GAMES_SETTINGS_SLOT,
+} from './settings-slot.ts'
 import { injectStyles } from './styles.ts'
 
 export { GamesApp } from './GamesApp.tsx'
@@ -39,7 +43,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * standalone entry, independent of any other plugin's UI group. The
      * section supplies no owner props.
      */
-    'settings.plugin.item': { kind: 'list'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
+    'settings.plugin.item': { kind: 'keyed'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
   }
 }
 
@@ -50,7 +54,7 @@ export interface SettingsPluginItemOwnerProps {
 }
 
 /** Settings namespace the games card edits (the Host plugin registers it). */
-const GAMES_SETTINGS_NS = 'games'
+const GAMES_SETTINGS_NS = GAMES_SETTINGS_SLOT.key
 
 /** The games settings fields (the namespace's schema shape). */
 interface GamesSettings {
@@ -94,9 +98,8 @@ export function apply(ctx: ClientContext): void {
   // contributed as its own card in the top-level plugin configuration list
   // (the settings namespace is not apiproxy-exposed for third parties).
   ctx.slots.inject('settings.plugin.item', () => ctx.slots.register({
-    name: 'settings.plugin.item',
-    id: 'games',
-    order: 150,
+    ...GAMES_SETTINGS_SLOT,
+    ...LEGACY_GAMES_SETTINGS_SLOT,
     locale: NS,
     inject: () => ({}),
   }, GamesSettingsCard))

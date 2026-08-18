@@ -1,10 +1,20 @@
+// @vitest-environment jsdom
+
 /**
  * Unit tests for the room pet scene layout engine (pure math, no DOM).
  * @module dsh-games/client/scene.test
  */
 
-import { describe, expect, it } from 'vitest'
-import { arrangeScene, snapPos, clampMemberSize, type SceneAnchor } from './scene.tsx'
+import { beforeEach, describe, expect, it } from 'vitest'
+import {
+  arrangeScene,
+  loadScenePrefs,
+  saveScenePrefs,
+  SCENE_KEY,
+  SCENE_SPACING_DEFAULT,
+  snapPos,
+  type SceneAnchor,
+} from './scene.tsx'
 
 const viewport = { width: 1280, height: 800 }
 const anchor: SceneAnchor = { id: 'me', size: 60, right: 24, bottom: 20 }
@@ -14,6 +24,10 @@ const members = [
   { id: 'b', size: 60 },
   { id: 'c', size: 60 },
 ]
+
+beforeEach(() => {
+  localStorage.clear()
+})
 
 describe('arrangeScene', () => {
   it('keeps the anchor in its own spot in every mode', () => {
@@ -123,10 +137,32 @@ describe('helpers', () => {
     expect(snapPos({ right: 137, bottom: 82 }, 40)).toEqual({ right: 120, bottom: 80 })
   })
 
-  it('clampMemberSize falls back and clamps', () => {
-    expect(clampMemberSize(undefined, 60)).toBe(60)
-    expect(clampMemberSize(1, 60)).toBe(24)
-    expect(clampMemberSize(9999, 60)).toBe(512)
-    expect(clampMemberSize(48.4, 60)).toBe(48)
+  it('defaults to horizontal 24px layout with labels visible', () => {
+    expect(SCENE_SPACING_DEFAULT).toBe(24)
+    expect(loadScenePrefs()).toEqual({
+      mode: 'row',
+      spacing: 24,
+      showLabels: true,
+      free: {},
+    })
+  })
+
+  it('does not let legacy v1 preferences override the new defaults', () => {
+    localStorage.setItem('dsh.games.scene.v1', JSON.stringify({
+      mode: 'free',
+      spacing: 110,
+      free: { a: { right: 10, bottom: 20 } },
+    }))
+    expect(loadScenePrefs()).toMatchObject({
+      mode: 'row',
+      spacing: 24,
+      showLabels: true,
+    })
+    expect(localStorage.getItem(SCENE_KEY)).toBeNull()
+  })
+
+  it('persists the local label visibility preference', () => {
+    saveScenePrefs({ mode: 'row', spacing: 24, showLabels: false, free: {} })
+    expect(loadScenePrefs().showLabels).toBe(false)
   })
 })

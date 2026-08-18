@@ -137,6 +137,20 @@ describe('RoomStore member sessions', () => {
     })
   })
 
+  it('ignores legacy member size so each observer controls all pet sizes locally', () => {
+    const store = new RoomStore()
+    const room = store.createRoom({}, 1_000)
+    const joined = store.joinMember(room.code, {
+      ...report(),
+      size: 320,
+    } as ReturnType<typeof report> & { size: number }, 1_000)
+
+    expect(joined.ok).toBe(true)
+    if (joined.ok) {
+      expect(joined.room.members[0]).not.toHaveProperty('size')
+    }
+  })
+
   it('does not let member B remove member A', () => {
     const store = new RoomStore()
     const room = store.createRoom()

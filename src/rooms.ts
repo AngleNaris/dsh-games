@@ -39,8 +39,6 @@ export interface MemberReport {
   petVersion?: number
   /** Built-in pet pattern variant the member's whale renders in. */
   petVariant?: string
-  /** The member's floating-pet size (px), for the room pet scene. */
-  size?: number
 }
 
 /** One member as the room exposes it. */
@@ -57,7 +55,6 @@ export interface RoomMemberView {
   petUrl?: string
   petVersion?: number
   petVariant?: string
-  size?: number
 }
 
 /** One chat message a member sent (bubbles show for a few seconds). */
@@ -257,10 +254,6 @@ function normalizePetVariant(raw: unknown): string | undefined {
   return undefined
 }
 
-/** Member pet size bounds (mirror the client display clamp). */
-export const MEMBER_SIZE_MIN = 24
-export const MEMBER_SIZE_MAX = 512
-
 /** Validate a member crowns array (10 counts, clamped). */
 function normalizeCrowns(raw: unknown): number[] | undefined {
   if (!Array.isArray(raw)) return undefined
@@ -417,9 +410,6 @@ export class RoomStore {
       joinedAt: existing?.joinedAt ?? now,
       lastSeen: now,
       petVariant: normalizePetVariant(report.petVariant) ?? existing?.petVariant,
-      size: typeof report.size === 'number' && Number.isFinite(report.size)
-        ? Math.min(MEMBER_SIZE_MAX, Math.max(MEMBER_SIZE_MIN, Math.round(report.size)))
-        : existing?.size,
       ...(report.petUrl !== undefined || existing?.petUrl !== undefined
         ? { petUrl: report.petUrl !== undefined ? normalizePetUrl(report.petUrl) ?? undefined : existing?.petUrl }
         : {}),

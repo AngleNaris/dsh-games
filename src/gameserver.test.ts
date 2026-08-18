@@ -245,6 +245,25 @@ describe('game server protocol v3', () => {
     expect(leave.body).toEqual({ ok: true, removed: true })
   })
 
+  it('accepts but does not echo the legacy member size field', async () => {
+    const created = await json('/api/games/rooms', auth({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    }))
+    const room = created.body.room as { code: string }
+    const legacy = { ...member('member-z9', 'Legacy'), size: 256 }
+    const joined = await json(`/api/games/rooms/${room.code}/join`, auth({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ member: legacy }),
+    }))
+
+    expect(joined.response.status).toBe(200)
+    const snapshot = joined.body.room as { members: Array<Record<string, unknown>> }
+    expect(snapshot.members[0]).not.toHaveProperty('size')
+  })
+
   it('rejects crown forgery and abnormal token growth', async () => {
     const created = await json('/api/games/rooms', auth({
       method: 'POST',

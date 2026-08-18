@@ -47,7 +47,8 @@ export interface AntiCheatPolicy {
 }
 
 export interface AntiCheatOptions {
-  rules: CrownRules
+  /** Static rules, or a provider when host settings can change at runtime. */
+  rules: CrownRules | (() => CrownRules)
   policy?: Partial<AntiCheatPolicy>
   /** Optional JSON persistence path. Omit for memory-only validation. */
   stateFile?: string
@@ -165,14 +166,15 @@ function validEntry(raw: unknown): AntiCheatEntry | undefined {
 }
 
 export class AntiCheatGuard {
-  private readonly rules: CrownRules
+  private readonly rules: () => CrownRules
   private readonly policy: AntiCheatPolicy
   private readonly stateFile: string | undefined
   private readonly entries = new Map<string, AntiCheatEntry>()
   private dirty = false
 
   constructor(options: AntiCheatOptions) {
-    this.rules = options.rules
+    const rules = options.rules
+    this.rules = typeof rules === 'function' ? rules : () => rules
     this.policy = {
       ...DEFAULT_ANTI_CHEAT_POLICY,
       ...normalizeAntiCheatPolicy(options.policy),
@@ -185,7 +187,8 @@ export class AntiCheatGuard {
     const tokens = tokenTotal(report.tokens)
     if (tokens === undefined) return { ok: false, error: 'invalid' }
 
-    const expected = crownCounts(crownUnits(tokens, this.rules.tokenStep), this.rules.base)
+    const rules = this.rules()
+    const expected = crownCounts(crownUnits(tokens, rules.tokenStep), rules.base)
     const crowns = reportedCrowns(report.crowns, expected.length)
     const entry = this.entries.get(report.memberId)
 

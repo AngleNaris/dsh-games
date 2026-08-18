@@ -12,7 +12,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { WebRoute } from '@deepseek-ai/dsh-host-webserver'
 import type { GamesService } from './service.ts'
-import { defaultGameRules } from './gameconfig.ts'
 import {
   handleGameServer,
   HEALTH_API_PATH,
@@ -116,11 +115,10 @@ function sharedRoute(prefix: string, service: GamesService): WebRoute {
     kind: 'prefix',
     path: prefix,
     handler: (req: IncomingMessage, res: ServerResponse): void | Promise<void> => {
-      const rules = defaultGameRules()
       return handleGameServer(req, res, {
         rooms: service.rooms(),
         pets: service.pets(),
-        rules,
+        rules: service.gameRules(),
         // The host's in-process mount enforces auth only when the plugin is
         // configured with a token (same value the browser sends to the game
         // server); '' keeps the local prototype open.
@@ -215,7 +213,7 @@ export function makeGamesRoutes(service: GamesService): WebRoute[] {
         return handleGameServer(req, res, {
           rooms: service.rooms(),
           pets: service.pets(),
-          rules: defaultGameRules(),
+          rules: service.gameRules(),
           ...(service.authToken() !== '' ? { authToken: service.authToken() } : {}),
         })
       },
@@ -227,7 +225,7 @@ export function makeGamesRoutes(service: GamesService): WebRoute[] {
         return handleGameServer(req, res, {
           rooms: service.rooms(),
           pets: service.pets(),
-          rules: defaultGameRules(),
+          rules: service.gameRules(),
           ...(service.authToken() !== '' ? { authToken: service.authToken() } : {}),
         })
       },

@@ -1135,6 +1135,7 @@ export const CSS = `
   z-index: 3;
 }
 .dsg-pet:hover > .dsg-scene-label,
+.dsg-pet[data-show-label='true'] > .dsg-scene-label,
 .dsg-scene-label:hover {
   opacity: 1;
 }

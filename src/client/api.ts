@@ -90,8 +90,6 @@ export interface RoomMemberView {
   petVersion?: number
   /** Built-in pet pattern variant the member's whale renders in. */
   petVariant?: string
-  /** The member's floating-pet size (px), for the room pet scene. */
-  size?: number
 }
 
 /** One chat message a member sent (bubbles show for a few seconds). */
@@ -228,7 +226,6 @@ export interface MemberReport {
   petUrl?: string
   petVersion?: number
   petVariant?: string
-  size?: number
 }
 
 /** The browser-facing host API (same-origin personal state). */

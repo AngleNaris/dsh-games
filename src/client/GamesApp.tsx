@@ -48,7 +48,6 @@ import {
 } from './progress.ts'
 import {
   arrangeScene,
-  clampMemberSize,
   MemberPetScene,
   SceneControls,
   snapPos,
@@ -127,17 +126,41 @@ function sameGamesState(a: GamesState, b: GamesState): boolean {
     a.display.locked === b.display.locked
 }
 
+interface GamesStateIdentity {
+  base: string
+  authToken: string
+  memberId: string
+}
+
+function gamesStateIdentity(state: GamesState): GamesStateIdentity {
+  return {
+    base: gameServerApi.base(state.serverUrl),
+    authToken: state.authToken,
+    memberId: state.memberId,
+  }
+}
+
+function matchesGamesStateIdentity(
+  state: GamesState | null,
+  identity: GamesStateIdentity,
+): state is GamesState {
+  return state !== null &&
+    gameServerApi.base(state.serverUrl) === identity.base &&
+    state.authToken === identity.authToken &&
+    state.memberId === identity.memberId
+}
+
 interface GamesAppProps {
   t: Translate
 }
 
-/** Crown counts per the game server's rules (host state as fallback). */
+/** Crown counts per the game server's rules (host state as local fallback). */
 function effectiveCrowns(state: GamesState, rules: GameRules | null): number[] {
   return crownsAtTokens(state.tokens, state.crownTokenStep, rules)
 }
 
 /** Build a member report from the current own state. */
-function memberOf(state: GamesState, rules: GameRules | null): {
+function memberOf(state: GamesState, rules: GameRules): {
   memberId: string
   nickname: string
   tokens: number
@@ -147,7 +170,6 @@ function memberOf(state: GamesState, rules: GameRules | null): {
   petUrl?: string
   petVersion?: number
   petVariant?: string
-  size?: number
 } {
   return {
     memberId: state.memberId,
@@ -156,7 +178,6 @@ function memberOf(state: GamesState, rules: GameRules | null): {
     crowns: effectiveCrowns(state, rules),
     phase: state.phase,
     petVariant: state.petVariant,
-    size: state.display.size,
     ...(state.pet !== undefined
       ? {
           petUrl: petImageUrl(state.serverUrl, state.memberId, state.pet, state.authToken),
@@ -197,6 +218,7 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   const seenChatRef = useRef<Set<string>>(new Set())
   const stateRef = useRef<GamesState | null>(null)
   const rulesRef = useRef<GameRules | null>(null)
+  const rulesIdentityRef = useRef<string | null>(null)
   const roomRef = useRef<JoinedRoom | null>(null)
   const tokenStreamActiveRef = useRef(false)
   stateRef.current = state
@@ -222,6 +244,22 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     if (restoreFocus) {
       window.requestAnimationFrame(() => petRef.current?.focus())
     }
+  }, [])
+
+  const loadAuthoritativeRules = useCallback(async (current: GamesState): Promise<GameRules> => {
+    const identity = `${gameServerApi.base(current.serverUrl)}\n${current.authToken}`
+    if (rulesIdentityRef.current === identity && rulesRef.current !== null) {
+      return rulesRef.current
+    }
+    const result = await gameServerApi.rules(current.serverUrl, current.authToken)
+    const latest = stateRef.current
+    if (latest !== null &&
+        `${gameServerApi.base(latest.serverUrl)}\n${latest.authToken}` === identity) {
+      rulesIdentityRef.current = identity
+      rulesRef.current = result.rules
+      setRules(result.rules)
+    }
+    return result.rules
   }, [])
 
   useEffect(() => {
@@ -265,7 +303,10 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   // Crown pyramid above the pet: layout + merge animations (hook is called
   // before the early returns below, per the rules of hooks). Sizes are +20%
   // over the original 0.3× to make the pile read more clearly.
-  const crownCountsNow = state === null ? [] : effectiveCrowns(state, rules)
+  const ownRoomMember = state === null
+    ? undefined
+    : room?.members.find((member) => member.memberId === state.memberId)
+  const crownCountsNow = ownRoomMember?.crowns ?? (state === null ? [] : effectiveCrowns(state, rules))
   const crownSize = state === null ? 14 : Math.max(14, Math.round(state.display.size * 0.36))
   const pyramid = useCrownPyramid(crownCountsNow, crownSize)
 
@@ -277,7 +318,7 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     if (state === null || room === null) return {}
     const members: SceneMember[] = room.members.map((member) => ({
       id: member.memberId,
-      size: clampMemberSize(member.size, state.display.size),
+      size: state.display.size,
     }))
     const anchor: SceneAnchor = {
       id: state.memberId,
@@ -365,14 +406,23 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   useEffect(() => {
     if (state === null) return
     let cancelled = false
-    gameServerApi.rules(state.serverUrl, state.authToken).then((result) => {
-      if (!cancelled) setRules(result.rules)
+    const identity = `${gameServerApi.base(state.serverUrl)}\n${state.authToken}`
+    if (rulesIdentityRef.current !== identity) {
+      rulesIdentityRef.current = null
+      rulesRef.current = null
+      setRules(null)
+    }
+    loadAuthoritativeRules(state).then(() => {
+      // loadAuthoritativeRules commits only when the state identity still matches.
     }, () => {
-      // Unreachable server: fall back to the host's own numbers.
-      if (!cancelled) setRules(null)
+      if (!cancelled) {
+        rulesIdentityRef.current = null
+        rulesRef.current = null
+        setRules(null)
+      }
     })
     return () => { cancelled = true }
-  }, [state?.serverUrl, state?.authToken])
+  }, [loadAuthoritativeRules, state?.serverUrl, state?.authToken])
 
   // ---- token output activity + immediate token/crown progress FX ----
   useEffect(() => {
@@ -451,9 +501,12 @@ export function GamesApp(props: GamesAppProps): ReactElement {
         latest.code === code &&
         latest.memberToken === token
     }
-    const applySnapshot = (nextRoom: Awaited<ReturnType<typeof gameServerApi.heartbeat>>['room']): void => {
+    const applySnapshot = (
+      nextRoom: Awaited<ReturnType<typeof gameServerApi.heartbeat>>['room'],
+      clearError = true,
+    ): void => {
       if (disposed || !matchesRoom()) return
-      setRoomError(null)
+      if (clearError) setRoomError(null)
       // Incoming chat: surface every unseen message as a member bubble.
       const ownId = stateRef.current?.memberId
       for (const message of nextRoom.messages ?? []) {
@@ -514,13 +567,18 @@ export function GamesApp(props: GamesAppProps): ReactElement {
       if (disposed || inFlight || !matchesRoom()) return
       const current = stateRef.current
       if (current === null) return
+      const currentIdentity = gamesStateIdentity(current)
+      const matchesState = (): boolean =>
+        matchesGamesStateIdentity(stateRef.current, currentIdentity)
       inFlight = true
       controller = new AbortController()
-      const member = {
-        ...memberOf(current, rulesRef.current),
-        active: tokenStreamActiveRef.current,
-      }
       try {
+        const currentRules = await loadAuthoritativeRules(current)
+        if (disposed || !matchesRoom() || !matchesState()) return
+        const member = {
+          ...memberOf(current, currentRules),
+          active: tokenStreamActiveRef.current,
+        }
         const result = await gameServerApi.heartbeat(
           base,
           current.authToken,
@@ -529,28 +587,47 @@ export function GamesApp(props: GamesAppProps): ReactElement {
           member,
           controller.signal,
         )
+        if (!matchesState()) return
         applySnapshot(result.room)
       } catch (error) {
-        if (disposed || (error instanceof DOMException && error.name === 'AbortError')) return
+        if (disposed || !matchesState() ||
+            (error instanceof DOMException && error.name === 'AbortError')) return
         if (isAntiCheatError(error)) {
           setRoomError(antiCheatMessage(error, t))
           setRoom((prev) => prev === null ? prev : { ...prev, offline: false })
+          try {
+            rulesIdentityRef.current = null
+            rulesRef.current = null
+            setRules(null)
+            await loadAuthoritativeRules(current)
+            if (disposed || !matchesRoom() || !matchesState()) return
+            const authoritative = await gameServerApi.state(base, current.authToken, code)
+            if (!matchesState()) return
+            applySnapshot(authoritative.room, false)
+          } catch {
+            // Keep the last accepted snapshot; the next heartbeat retries.
+          }
         } else if (isMissingRoom(error)) {
           discardMissingRoom()
         } else if (canRefreshRoomMember(error) && matchesRoom()) {
           try {
             const latest = stateRef.current
             if (latest === null) return
+            const latestIdentity = gamesStateIdentity(latest)
+            const matchesLatest = (): boolean =>
+              matchesGamesStateIdentity(stateRef.current, latestIdentity)
+            const latestRules = await loadAuthoritativeRules(latest)
+            if (disposed || !matchesRoom() || !matchesLatest()) return
             const joined = await gameServerApi.join(
               base,
               latest.authToken,
               code,
               {
-                ...memberOf(latest, rulesRef.current),
+                ...memberOf(latest, latestRules),
                 active: tokenStreamActiveRef.current,
               },
             )
-            if (disposed || !matchesRoom()) return
+            if (disposed || !matchesRoom() || !matchesLatest()) return
             storeRoom(base, code, joined.memberToken)
             setRoom((prev) => {
               if (prev === null ||
@@ -592,21 +669,27 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     }
     // State and rules are read through refs so report changes do not spawn
     // overlapping intervals; only the authenticated room identity re-arms.
-  }, [roomKey, t])
+  }, [loadAuthoritativeRules, roomKey, t])
 
   // ---- room join / create / leave ----
   const joinRoom = useCallback(async (code: string): Promise<boolean> => {
     setRoomError(null)
     const current = stateRef.current
     if (current === null) return false
+    const currentIdentity = gamesStateIdentity(current)
+    const matchesState = (): boolean =>
+      matchesGamesStateIdentity(stateRef.current, currentIdentity)
     try {
-      const resolvedBase = gameServerApi.base(current.serverUrl)
+      const resolvedBase = currentIdentity.base
+      const currentRules = await loadAuthoritativeRules(current)
+      if (!matchesState()) return false
       const result = await gameServerApi.join(
         resolvedBase,
         current.authToken,
         code,
-        { ...memberOf(current, rules), active: tokenStreamActiveRef.current },
+        { ...memberOf(current, currentRules), active: tokenStreamActiveRef.current },
       )
+      if (!matchesState()) return false
       setRoom({
         base: resolvedBase,
         code,
@@ -619,12 +702,13 @@ export function GamesApp(props: GamesAppProps): ReactElement {
       storeRoom(resolvedBase, code, result.memberToken)
       return true
     } catch (error) {
+      if (!matchesState()) return false
       setRoomError(isAntiCheatError(error)
         ? antiCheatMessage(error, t)
         : error instanceof Error ? error.message : String(error))
       return false
     }
-  }, [rules])
+  }, [loadAuthoritativeRules, t])
 
   const createRoom = useCallback(async (options: { name?: string; public?: boolean }): Promise<boolean> => {
     setRoomError(null)
@@ -742,10 +826,15 @@ export function GamesApp(props: GamesAppProps): ReactElement {
       clearStoredRoom()
       return
     }
+    const currentIdentity = gamesStateIdentity(current)
+    const matchesState = (): boolean =>
+      matchesGamesStateIdentity(stateRef.current, currentIdentity)
     let cancelled = false
     const restore = async (): Promise<void> => {
       let activeToken = stored.memberToken
       try {
+        const currentRules = await loadAuthoritativeRules(current)
+        if (cancelled || !matchesState()) return
         let result
         try {
           result = await gameServerApi.heartbeat(
@@ -754,26 +843,29 @@ export function GamesApp(props: GamesAppProps): ReactElement {
             stored.code,
             activeToken,
             {
-              ...memberOf(current, rulesRef.current),
+              ...memberOf(current, currentRules),
               active: tokenStreamActiveRef.current,
             },
           )
+          if (cancelled || !matchesState()) return
         } catch (error) {
+          if (cancelled || !matchesState()) return
           if (!canRefreshRoomMember(error)) throw error
           const joined = await gameServerApi.join(
             configuredBase,
             current.authToken,
             stored.code,
             {
-              ...memberOf(current, rulesRef.current),
+              ...memberOf(current, currentRules),
               active: tokenStreamActiveRef.current,
             },
           )
+          if (cancelled || !matchesState()) return
           activeToken = joined.memberToken
           storeRoom(configuredBase, stored.code, activeToken)
           result = { ok: true as const, room: joined.room }
         }
-        if (cancelled) return
+        if (cancelled || !matchesState()) return
         setRoom({
           base: configuredBase,
           code: stored.code,
@@ -786,7 +878,7 @@ export function GamesApp(props: GamesAppProps): ReactElement {
         setBubble(t('room.autoJoined'))
         window.setTimeout(() => setBubble(null), 3_000)
       } catch (error) {
-        if (cancelled) return
+        if (cancelled || !matchesState()) return
         if (isAntiCheatError(error)) {
           clearStoredRoom()
           setRoom(null)
@@ -814,7 +906,7 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     }
     void restore()
     return () => { cancelled = true }
-  }, [state?.memberId, t])
+  }, [loadAuthoritativeRules, state?.memberId, t])
 
   // ---- nickname ----
   const saveNickname = useCallback(async (): Promise<void> => {
@@ -1331,9 +1423,10 @@ export function GamesApp(props: GamesAppProps): ReactElement {
             <MemberPetScene
               key={member.memberId}
               member={member}
-              size={clampMemberSize(member.size, display.size)}
+              size={display.size}
               pos={pos}
               draggable={!auto}
+              showLabel={scene.prefs.showLabels}
               chat={memberChat ?? null}
               onMove={(next) => {
                 scene.moveMember(member.memberId, scene.prefs.mode === 'grid' ? snapPos(next, scene.prefs.spacing) : next)

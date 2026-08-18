@@ -592,6 +592,7 @@ export function MiniCrown(props: {
   return (
     <span
       className={top >= 5 ? 'dsg-mini-crown dsg-crown-magic' : 'dsg-mini-crown'}
+      data-tier={top}
       style={{ ...style, '--dsg-rot': '-3deg' } as CSSProperties}
     >
       <Crown level={top} size={size} />
