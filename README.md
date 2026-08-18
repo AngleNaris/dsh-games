@@ -123,15 +123,14 @@ compose 与 package 元数据 → 不使用 `--delete` 地同步到服务器 →
 
 ### 使用 GitHub Release 安装包（推荐）
 
-从 GitHub Release 下载 `anglenaris-dsh-games-<版本>.tgz`，复制到目标电脑后执行：
+在 PowerShell 中执行这一条固定命令，即可从 GitHub 获取并安装最新版本：
 
 ```powershell
-dsh plugin --profile web add "D:\Downloads\anglenaris-dsh-games-0.1.2.tgz"
-dsh web
+dsh plugin --profile web add "https://github.com/AngleNaris/dsh-games/releases/latest/download/anglenaris-dsh-games.tgz"
 ```
 
 发布包已经包含构建好的 host/client 代码，目标电脑无需复制 `node_modules`，也无需重新构建。
-升级时安装新版本的 `.tgz` 并重启 `dsh web`；卸载命令：
+升级时再次执行同一条命令，然后重启 `dsh web`。卸载命令：
 
 ```powershell
 dsh plugin --profile web remove @anglenaris/dsh-games
