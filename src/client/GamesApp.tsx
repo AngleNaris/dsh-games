@@ -33,9 +33,8 @@ import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 import { formatTokens } from './locales.ts'
 import {
   CROWN_LEVELS,
-  DEFAULT_CROWN_BASE,
-  crownUnits,
 } from '../crowns.ts'
+import { defaultGameRules } from '../rules.ts'
 import { DeepSeekWhale, PET_VARIANTS, customVariantId, isCustomVariant, petVariantOf } from './whale.tsx'
 import { useCrownPyramid } from './crowns.tsx'
 import { RoomPanel } from './RoomPanel.tsx'
@@ -55,6 +54,7 @@ import {
   type SceneAnchor,
   type SceneMember,
 } from './scene.tsx'
+import { isPetActive } from './activity.ts'
 
 /** Poll cadence for the own host snapshot. */
 const STATE_POLL_MS = 2_000
@@ -108,7 +108,6 @@ function sameGamesState(a: GamesState, b: GamesState): boolean {
     a.crownUnits === b.crownUnits &&
     a.phase === b.phase &&
     a.tokenActiveUntil === b.tokenActiveUntil &&
-    a.crownTokenStep === b.crownTokenStep &&
     a.enabled === b.enabled &&
     a.petVariant === b.petVariant &&
     a.serverUrl === b.serverUrl &&
@@ -154,9 +153,9 @@ interface GamesAppProps {
   t: Translate
 }
 
-/** Crown counts per the game server's rules (host state as local fallback). */
-function effectiveCrowns(state: GamesState, rules: GameRules | null): number[] {
-  return crownsAtTokens(state.tokens, state.crownTokenStep, rules)
+/** Crown counts per server rules, or the shared defaults while offline. */
+function effectiveCrowns(state: GamesState, rules: GameRules): number[] {
+  return crownsAtTokens(state.tokens, rules)
 }
 
 /** Build a member report from the current own state. */
@@ -190,7 +189,7 @@ function memberOf(state: GamesState, rules: GameRules): {
 export function GamesApp(props: GamesAppProps): ReactElement {
   const { t } = props
   const [state, setState] = useState<GamesState | null>(null)
-  const [rules, setRules] = useState<GameRules | null>(null)
+  const [rules, setRules] = useState<GameRules>(() => defaultGameRules())
   const [room, setRoom] = useState<JoinedRoom | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [bubble, setBubble] = useState<string | null>(null)
@@ -217,7 +216,7 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   const [memberChats, setMemberChats] = useState<Record<string, { text: string; key: string; leaving?: boolean }>>({})
   const seenChatRef = useRef<Set<string>>(new Set())
   const stateRef = useRef<GamesState | null>(null)
-  const rulesRef = useRef<GameRules | null>(null)
+  const rulesRef = useRef<GameRules>(defaultGameRules())
   const rulesIdentityRef = useRef<string | null>(null)
   const roomRef = useRef<JoinedRoom | null>(null)
   const tokenStreamActiveRef = useRef(false)
@@ -248,18 +247,30 @@ export function GamesApp(props: GamesAppProps): ReactElement {
 
   const loadAuthoritativeRules = useCallback(async (current: GamesState): Promise<GameRules> => {
     const identity = `${gameServerApi.base(current.serverUrl)}\n${current.authToken}`
-    if (rulesIdentityRef.current === identity && rulesRef.current !== null) {
+    if (rulesIdentityRef.current === identity) {
       return rulesRef.current
     }
-    const result = await gameServerApi.rules(current.serverUrl, current.authToken)
-    const latest = stateRef.current
-    if (latest !== null &&
-        `${gameServerApi.base(latest.serverUrl)}\n${latest.authToken}` === identity) {
-      rulesIdentityRef.current = identity
-      rulesRef.current = result.rules
-      setRules(result.rules)
+    try {
+      const result = await gameServerApi.rules(current.serverUrl, current.authToken)
+      const latest = stateRef.current
+      if (latest !== null &&
+          `${gameServerApi.base(latest.serverUrl)}\n${latest.authToken}` === identity) {
+        rulesIdentityRef.current = identity
+        rulesRef.current = result.rules
+        setRules(result.rules)
+      }
+      return result.rules
+    } catch {
+      const fallback = defaultGameRules()
+      const latest = stateRef.current
+      if (latest !== null &&
+          `${gameServerApi.base(latest.serverUrl)}\n${latest.authToken}` === identity) {
+        rulesIdentityRef.current = null
+        rulesRef.current = fallback
+        setRules(fallback)
+      }
+      return fallback
     }
-    return result.rules
   }, [])
 
   useEffect(() => {
@@ -405,23 +416,16 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   // ---- game-server rules (crown ladder, upload caps) ----
   useEffect(() => {
     if (state === null) return
-    let cancelled = false
     const identity = `${gameServerApi.base(state.serverUrl)}\n${state.authToken}`
     if (rulesIdentityRef.current !== identity) {
       rulesIdentityRef.current = null
-      rulesRef.current = null
-      setRules(null)
+      const fallback = defaultGameRules()
+      rulesRef.current = fallback
+      setRules(fallback)
     }
-    loadAuthoritativeRules(state).then(() => {
+    void loadAuthoritativeRules(state).then(() => {
       // loadAuthoritativeRules commits only when the state identity still matches.
-    }, () => {
-      if (!cancelled) {
-        rulesIdentityRef.current = null
-        rulesRef.current = null
-        setRules(null)
-      }
     })
-    return () => { cancelled = true }
   }, [loadAuthoritativeRules, state?.serverUrl, state?.authToken])
 
   // ---- token output activity + immediate token/crown progress FX ----
@@ -447,7 +451,6 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     if (tokenProgressRef.current === null) {
       tokenProgressRef.current = createTokenProgressBaseline(
         state.tokens,
-        state.crownTokenStep,
         rules,
       )
       setDisplayTokens(state.tokens)
@@ -456,7 +459,6 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     const settled = settleTokenProgress(
       tokenProgressRef.current,
       state.tokens,
-      state.crownTokenStep,
       rules,
     )
     tokenProgressRef.current = settled.baseline
@@ -469,7 +471,7 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     if (settled.crownTier !== null) {
       setCrownFx({ tier: settled.crownTier, key: Date.now() })
     }
-  }, [state?.tokens, state?.crownTokenStep, rules])
+  }, [state?.tokens, rules])
 
   useEffect(() => {
     if (tokenFx === null) return
@@ -597,8 +599,9 @@ export function GamesApp(props: GamesAppProps): ReactElement {
           setRoom((prev) => prev === null ? prev : { ...prev, offline: false })
           try {
             rulesIdentityRef.current = null
-            rulesRef.current = null
-            setRules(null)
+            const fallback = defaultGameRules()
+            rulesRef.current = fallback
+            setRules(fallback)
             await loadAuthoritativeRules(current)
             if (disposed || !matchesRoom() || !matchesState()) return
             const authoritative = await gameServerApi.state(base, current.authToken, code)
@@ -950,16 +953,14 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   const uploadPet = useCallback(async (file: File | undefined): Promise<void> => {
     const current = stateRef.current
     if (file === undefined || current === null) return
-    const petRules = rules?.pet
-    if (petRules !== undefined) {
-      if (!['image/png', 'image/gif'].includes(file.type)) {
-        setPetNote(t('menu.uploadTypeError'))
-        return
-      }
-      if (file.size > petRules.maxBytes) {
-        setPetNote(t('menu.uploadSizeError'))
-        return
-      }
+    const petRules = rules.pet
+    if (!['image/png', 'image/gif'].includes(file.type)) {
+      setPetNote(t('menu.uploadTypeError'))
+      return
+    }
+    if (file.size > petRules.maxBytes) {
+      setPetNote(t('menu.uploadSizeError'))
+      return
     }
     setPetBusy(true)
     setPetNote(null)
@@ -1080,20 +1081,15 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   // The bottom bar shows nickname + tokens only; growth settles on the next
   // host-state poll and shows a short "+N" chip.
   const label = `${state.nickname} · ${formatTokens(displayTokens ?? state.tokens)} tokens`
-  const consuming = tokenStreamActive ||
-    state.phase === 'waiting' ||
-    state.phase === 'thinking' ||
-    state.phase === 'tool'
+  const consuming = isPetActive(state.phase, tokenStreamActive)
   const customVariant = isCustomVariant(state.petVariant) ? petVariantOf(state.petVariant) : null
   const petUrl = state.pet !== undefined
     ? petImageUrl(state.serverUrl, state.memberId, state.pet, state.authToken)
     : undefined
-  const petHint = rules !== null
-    ? t('menu.uploadHintRules', {
-        maxBytes: Math.round(rules.pet.maxBytes / 1024 / 1024 * 10) / 10,
-        maxDimension: rules.pet.maxDimension,
-      })
-    : t('menu.uploadHint')
+  const petHint = t('menu.uploadHintRules', {
+    maxBytes: Math.round(rules.pet.maxBytes / 1024 / 1024 * 10) / 10,
+    maxDimension: rules.pet.maxDimension,
+  })
 
   return (
     <span data-dsh-games data-testid="games-app">

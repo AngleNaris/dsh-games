@@ -114,6 +114,7 @@ export const CSS = `
   pointer-events: none;
   box-shadow: var(--dsw-shadow-lv2, 0 4px 12px rgba(0, 0, 0, 0.2));
   transition:
+    opacity 120ms ease,
     border-color 260ms ease,
     box-shadow 260ms ease;
 }
@@ -1113,29 +1114,11 @@ export const CSS = `
   cursor: default;
 }
 .dsg-scene-label {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: calc(100% + 2px);
-  max-width: 200px;
-  background: var(--dsw-alias-bg-layer-3, #1f2836);
-  color: var(--dsw-alias-label-primary, #e8e8f0);
-  border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.16));
-  border-radius: 999px;
-  padding: 3px 9px;
-  font-size: 11px;
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
   opacity: 0;
-  transition: opacity 120ms ease;
-  box-shadow: var(--dsw-shadow-lv1, 0 2px 6px rgba(0, 0, 0, 0.2));
   z-index: 3;
 }
-.dsg-pet:hover > .dsg-scene-label,
-.dsg-pet[data-show-label='true'] > .dsg-scene-label,
+.dsg-pet:hover > .dsg-pet-label.dsg-scene-label,
+.dsg-pet[data-show-label='true'] > .dsg-pet-label.dsg-scene-label,
 .dsg-scene-label:hover {
   opacity: 1;
 }

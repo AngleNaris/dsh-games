@@ -23,8 +23,9 @@ import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 import type { RoomMemberView } from './api.ts'
 import { formatTokens } from './locales.ts'
 import { DeepSeekWhale } from './whale.tsx'
-import { MiniCrown } from './crowns.tsx'
+import { useCrownPyramid } from './crowns.tsx'
 import { ChatBubble } from './chat.tsx'
+import { isPetActive } from './activity.ts'
 
 /** Arrangement modes (order is the UI order too). */
 export type ArrangeMode = 'free' | 'row' | 'column' | 'grid' | 'orbit'
@@ -288,6 +289,10 @@ export function MemberPetScene(props: {
 }): ReactElement {
   const { member, size, pos, draggable, onMove, showLabel, chat } = props
   const dragRef = useRef<{ startX: number; startY: number; right: number; bottom: number } | null>(null)
+  const previousTokensRef = useRef(member.tokens)
+  const [tokenFx, setTokenFx] = useState<{ delta: number; key: number } | null>(null)
+  const crownSize = Math.max(14, Math.round(size * 0.36))
+  const pyramid = useCrownPyramid(member.crowns, crownSize)
 
   const onPointerDown = (event: React.PointerEvent): void => {
     if (!draggable) return
@@ -310,17 +315,27 @@ export function MemberPetScene(props: {
     return () => window.removeEventListener('blur', stopDrag)
   }, [])
 
-  const hasCrowns = member.crowns.some((count) => count > 0)
-  const label = `${member.nickname} · ${formatTokens(member.tokens)}`
-  const active = member.active === true ||
-    member.phase === 'waiting' ||
-    member.phase === 'thinking' ||
-    member.phase === 'tool'
+  useEffect(() => {
+    const previous = previousTokensRef.current
+    previousTokensRef.current = member.tokens
+    const delta = member.tokens - previous
+    if (delta > 0) setTokenFx({ delta, key: Date.now() })
+  }, [member.tokens])
+
+  useEffect(() => {
+    if (tokenFx === null) return
+    const timer = window.setTimeout(() => setTokenFx(null), 1_800)
+    return () => window.clearTimeout(timer)
+  }, [tokenFx])
+
+  const label = `${member.nickname} · ${formatTokens(member.tokens)} tokens`
+  const active = isPetActive(member.phase, member.active === true)
   return (
     <span
       className="dsg-pet-root dsg-scene-root"
       data-dragging={draggable}
       data-testid="games-scene-pet"
+      data-member-id={member.memberId}
       style={{ right: pos.right, bottom: pos.bottom }}
     >
       <span
@@ -339,7 +354,11 @@ export function MemberPetScene(props: {
       >
         <span className="dsg-whale-wrap">
           <span className="dsg-whale-breathe">
-            {hasCrowns && <MiniCrown counts={member.crowns} size={Math.max(10, Math.round(size * 0.55))} />}
+            {pyramid.crowns.length > 0 && <>{pyramid.crowns}</>}
+            {pyramid.flash}
+            {pyramid.overflow > 0 && (
+              <span className="dsg-crown-badge" style={{ top: pyramid.pileTop }}>+{pyramid.overflow}</span>
+            )}
             {member.petUrl !== undefined && member.petUrl !== ''
               ? (
                 <img
@@ -355,7 +374,19 @@ export function MemberPetScene(props: {
         </span>
         {chat !== null && chat !== undefined &&
           <ChatBubble key={chat.key} text={chat.text} from={member.nickname} leaving={chat.leaving} />}
-        <span className="dsg-scene-label">{label}</span>
+        <span
+          className={`dsg-pet-label dsg-scene-label${active ? ' dsg-label-active' : ''}${tokenFx !== null ? ' dsg-label-burst' : ''}`}
+          data-testid="games-scene-label"
+        >
+          <span className="dsg-label-content">
+            {label}
+            {tokenFx !== null && (
+              <em className="dsg-token-chip" key={tokenFx.key} data-testid="games-scene-token-chip">
+                +{formatTokens(tokenFx.delta)}
+              </em>
+            )}
+          </span>
+        </span>
       </span>
     </span>
   )

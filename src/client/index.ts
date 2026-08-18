@@ -60,7 +60,6 @@ const GAMES_SETTINGS_NS = GAMES_SETTINGS_SLOT.key
 interface GamesSettings {
   enabled?: boolean
   nickname?: string
-  crownTokenStep?: number
   petVariant?: string
   serverUrl?: string
 }

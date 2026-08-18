@@ -18,8 +18,6 @@ import {
 import {
   crownCounts,
   crownUnits,
-  DEFAULT_CROWN_BASE,
-  DEFAULT_CROWN_TOKEN_STEP,
 } from './crowns.ts'
 import {
   DEFAULT_GAME_SERVER_AUTH_TOKEN,
@@ -46,7 +44,7 @@ import {
 } from './rooms.ts'
 import { PetStore } from './pets.ts'
 import { AntiCheatGuard, normalizeAntiCheatPolicy } from './anticheat.ts'
-import { defaultGameRules } from './gameconfig.ts'
+import { defaultGameRules, type GameRules } from './rules.ts'
 
 /** Settings-section shape the web settings surface edits. */
 export interface GamesSection {
@@ -54,8 +52,6 @@ export interface GamesSection {
   enabled?: boolean
   /** Player nickname shown on the pet and in rooms. */
   nickname: string
-  /** Tokens per bronze crown (host fallback; the game server rules win). */
-  crownTokenStep: number
   /** Built-in pet pattern variant id. */
   petVariant: string
   /** Game-server base URL ('' = same-origin in-process mount). */
@@ -70,10 +66,6 @@ export interface GamesConfig extends RoomStoreOptions {
   enabled?: boolean
   /** Default nickname (settings override when the surface is attached). */
   nickname?: string
-  /** Tokens per crown (settings override when the surface is attached). */
-  crownTokenStep?: number
-  /** Legacy settings key for tokens per crown. */
-  hatTokenStep?: number
   /** Default pet pattern variant. */
   petVariant?: string
   /** Default game-server base URL. */
@@ -92,7 +84,7 @@ export interface GamesStateView {
   nickname: string
   /** Lifetime usage tokens. */
   tokens: number
-  /** Crown units (tokens / crownTokenStep, floored). */
+  /** Crown units derived with the in-process server's default rules. */
   crownUnits: number
   /** Crown counts per level, lowest first (see crowns.ts). */
   crowns: number[]
@@ -100,8 +92,6 @@ export interface GamesStateView {
   phase: MemberPhase
   /** Short output-activity window refreshed by assistant stream events. */
   tokenActiveUntil: number
-  /** Tokens per crown in effect (host fallback; server rules win). */
-  crownTokenStep: number
   /** Master switch (false hides the pet and stops counting). */
   enabled: boolean
   /** Built-in pet pattern variant in effect. */
@@ -138,8 +128,6 @@ export interface SetDisplayResult {
 /** Runtime-config patch accepted by `games.setConfig`. */
 export interface GamesConfigPatch {
   nickname?: string
-  crownTokenStep?: number
-  hatTokenStep?: number
   enabled?: boolean
   petVariant?: string
   serverUrl?: string
@@ -183,7 +171,6 @@ export class GamesService extends Service {
   private readonly memo = new StepMemo()
   private readonly roomStore: RoomStore
   private readonly petStore: PetStore
-  private readonly crownTokenStepDefault: number
   private readonly petVariantDefault: string
   private readonly serverUrlDefault: string
   private readonly authTokenDefault: string
@@ -198,7 +185,6 @@ export class GamesService extends Service {
     super(ctx, 'games')
     this.persistDir = config.persistDir ?? gamesHomeDir()
     this.persist = loadGamesPersist(this.persistDir)
-    this.crownTokenStepDefault = config.crownTokenStep ?? config.hatTokenStep ?? DEFAULT_CROWN_TOKEN_STEP
     this.petVariantDefault = config.petVariant ?? DEFAULT_PET_VARIANT
     this.serverUrlDefault = typeof config.serverUrl === 'string'
       ? config.serverUrl.trim()
@@ -274,7 +260,6 @@ export class GamesService extends Service {
   private section(): GamesSection {
     return this.sectionSource?.() ?? {
       nickname: this.persist.nickname,
-      crownTokenStep: this.crownTokenStepDefault,
       petVariant: this.petVariantDefault,
       serverUrl: this.serverUrlDefault,
       authToken: this.authTokenDefault,
@@ -366,8 +351,8 @@ export class GamesService extends Service {
   }
 
   /**
-   * RPC: apply a runtime-config patch (nickname / crownTokenStep / enabled /
-   * petVariant / serverUrl). Values are mirrored into the `games` settings
+   * RPC: apply a runtime-config patch (nickname / enabled / petVariant /
+   * serverUrl). Values are mirrored into the `games` settings
    * namespace so the web settings surface stays consistent; when the settings
    * provider is absent the patch still applies locally.
    */
@@ -380,14 +365,6 @@ export class GamesService extends Service {
       this.persist = { ...this.persist, nickname: trimmed }
       this.flush()
       settingsPatch.nickname = trimmed
-    }
-    const step = patch.crownTokenStep ?? patch.hatTokenStep
-    if (step !== undefined) {
-      const rounded = Math.round(step)
-      if (!Number.isFinite(rounded) || rounded < 1 || rounded > 1_000_000_000_000) {
-        return { ok: false, error: 'invalid-crown-token-step' }
-      }
-      settingsPatch.crownTokenStep = rounded
     }
     if (patch.enabled !== undefined) {
       if (typeof patch.enabled !== 'boolean') return { ok: false, error: 'invalid-enabled' }
@@ -475,29 +452,22 @@ export class GamesService extends Service {
   }
 
   /** Rules enforced by the host-mounted room server and shown to its client. */
-  gameRules(): ReturnType<typeof defaultGameRules> {
-    const rules = defaultGameRules()
-    const section = this.section()
-    rules.crown.tokenStep = Math.max(
-      1,
-      Math.round(section.crownTokenStep ?? this.crownTokenStepDefault),
-    )
-    return rules
+  gameRules(): GameRules {
+    return defaultGameRules()
   }
 
   private view(): GamesStateView {
     const section = this.section()
-    const crownTokenStep = this.gameRules().crown.tokenStep
-    const units = crownUnits(this.persist.tokens, crownTokenStep)
+    const rules = this.gameRules()
+    const units = crownUnits(this.persist.tokens, rules.crown.tokenStep)
     return {
       memberId: this.persist.memberId,
       nickname: section.nickname?.trim() !== '' ? section.nickname : DEFAULT_NICKNAME,
       tokens: this.persist.tokens,
       crownUnits: units,
-      crowns: crownCounts(units, DEFAULT_CROWN_BASE),
+      crowns: crownCounts(units, rules.crown.base),
       phase: this.phase,
       tokenActiveUntil: this.tokenActiveUntil,
-      crownTokenStep,
       enabled: this.enabled,
       petVariant: section.petVariant ?? this.petVariantDefault,
       serverUrl: section.serverUrl ?? this.serverUrlDefault,

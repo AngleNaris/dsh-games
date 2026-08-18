@@ -16,7 +16,6 @@ import {
   DEFAULT_NICKNAME,
   NICKNAME_MAX_LENGTH,
 } from './persist.ts'
-import { DEFAULT_CROWN_TOKEN_STEP } from './crowns.ts'
 import {
   DEFAULT_GAME_SERVER_AUTH_TOKEN,
   DEFAULT_GAME_SERVER_URL,
@@ -93,7 +92,6 @@ export const inject = ['webServer']
 export const GAMES_SETTINGS_SCHEMA = z.object({
   enabled: z.boolean().default(true),
   nickname: z.string().min(1).max(NICKNAME_MAX_LENGTH).pattern(/\S/).default(DEFAULT_NICKNAME),
-  crownTokenStep: z.number().step(1).min(1).max(1_000_000_000_000).default(DEFAULT_CROWN_TOKEN_STEP),
   petVariant: z.string().min(1).max(64).default(DEFAULT_PET_VARIANT),
   serverUrl: z.string().max(512).default(DEFAULT_GAME_SERVER_URL),
   authToken: z.string().max(256).default(DEFAULT_GAME_SERVER_AUTH_TOKEN),
@@ -107,14 +105,13 @@ export const GAMES_SETTINGS_SCHEMA = z.object({
 export function apply(ctx: Context, config: GamesConfig = {}): void {
   const service = new GamesService(ctx, { ...config })
 
-  // The settings surface edits nickname / crown step / enabled / pet pattern
-  // / server URL through the `games` namespace. The composition `base` starts
+  // The settings surface edits nickname / enabled / pet pattern / server URL
+  // through the `games` namespace. The composition `base` starts
   // as the persisted values, so an empty user layer resolves to exactly what
   // the pet already shows. `current()` stays the authoritative section for
   // the service.
   const base: GamesSection = {
     nickname: service.nickname(),
-    crownTokenStep: config.crownTokenStep ?? config.hatTokenStep ?? DEFAULT_CROWN_TOKEN_STEP,
     petVariant: config.petVariant ?? DEFAULT_PET_VARIANT,
     serverUrl: typeof config.serverUrl === 'string'
       ? config.serverUrl.trim()

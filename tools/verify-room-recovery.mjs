@@ -105,12 +105,16 @@ try {
   await pageA.waitForTimeout(400)
   const activeMotion = await remotePet.locator('.dsg-whale-wrap').evaluate((element) => {
     const style = getComputedStyle(element)
+    const label = element.closest('.dsg-pet')?.querySelector('.dsg-pet-label')
     return {
       animationName: style.animationName,
-      floatY: style.getPropertyValue('--dsg-float-y').trim(),
+      labelActive: label?.classList.contains('dsg-label-active') === true,
+      shimmerOpacity: label === null ? '' : getComputedStyle(label, '::before').opacity,
     }
   })
-  if (activeMotion.animationName !== 'dsg-active-float' || activeMotion.floatY !== '-8px') {
+  if (activeMotion.animationName !== 'dsg-active-float' ||
+      !activeMotion.labelActive ||
+      activeMotion.shimmerOpacity !== '1') {
     throw new Error(`remote active motion mismatch: ${JSON.stringify(activeMotion)}`)
   }
 
@@ -123,26 +127,37 @@ try {
   const sleepingStyle = await remotePet.locator('.dsg-whale-wrap').evaluate((element) => {
     const style = getComputedStyle(element)
     const breathe = element.querySelector('.dsg-whale-breathe')
+    const petVisual = breathe?.querySelector(':scope > svg, :scope > .dsg-pet-img')
+    const label = element.closest('.dsg-pet')?.querySelector('.dsg-pet-label')
     return {
       animationName: style.animationName,
       breatheAnimation: breathe === null ? '' : getComputedStyle(breathe).animationName,
-      floatY: style.getPropertyValue('--dsg-float-y').trim(),
-      filter: style.filter,
+      petFilter: petVisual === null || petVisual === undefined ? '' : getComputedStyle(petVisual).filter,
+      labelActive: label?.classList.contains('dsg-label-active') === true,
+      shimmerOpacity: label === null ? '' : getComputedStyle(label, '::before').opacity,
     }
   })
-  if (sleepingStyle.animationName !== 'dsg-active-float' ||
+  if (sleepingStyle.animationName !== 'none' ||
       sleepingStyle.breatheAnimation !== 'dsg-sleep-breathe' ||
-      sleepingStyle.floatY !== '0px') {
+      sleepingStyle.labelActive ||
+      sleepingStyle.shimmerOpacity !== '0') {
     throw new Error(`remote sleeping motion mismatch: ${JSON.stringify(sleepingStyle)}`)
   }
-  if (sleepingStyle.filter !== 'none') {
-    throw new Error(`pet shadow/filter still applied: ${sleepingStyle.filter}`)
+  if (!sleepingStyle.petFilter.includes('drop-shadow')) {
+    throw new Error(`pet shadow/filter missing: ${sleepingStyle.petFilter}`)
   }
-  const hasDropShadow = await pageA.evaluate(() => {
-    return [...document.querySelectorAll('style[data-plugin-css]')]
-      .some((style) => style.textContent?.includes('drop-shadow(') === true)
+  const shadowScope = await pageA.evaluate(() => {
+    const css = [...document.querySelectorAll('style[data-plugin-css]')]
+      .map((style) => style.textContent ?? '')
+      .join('\n')
+    return {
+      petHasShadow: /\.dsg-whale-breathe > svg,[^{]*\.dsg-whale-breathe > \.dsg-pet-img \{[^}]*drop-shadow\(/s.test(css),
+      crownHasShadow: /\.dsg-crown[^{]*\{[^}]*drop-shadow\(/s.test(css),
+    }
   })
-  if (hasDropShadow) throw new Error('injected pet/crown CSS still contains drop-shadow')
+  if (!shadowScope.petHasShadow || shadowScope.crownHasShadow) {
+    throw new Error(`pet/crown shadow scope mismatch: ${JSON.stringify(shadowScope)}`)
+  }
 
   const tokenBefore = await pageB.evaluate(() => localStorage.getItem('dsh.games.room.v3'))
   if (tokenBefore === null) throw new Error('room session was not stored before recovery test')
@@ -177,8 +192,8 @@ try {
   await pageB.waitForTimeout(4_000)
 
   if (errors.length > 0) throw new Error(`browser console errors:\n${errors.join('\n')}`)
-  console.log(`[room-recovery] room ${code}: remote phase sync active -> sleeping passed`)
-  console.log('[room-recovery] pet/crown CSS contains no drop-shadow and computed pet filter is none')
+  console.log(`[room-recovery] room ${code}: remote motion and label FX active -> sleeping passed`)
+  console.log('[room-recovery] pet shadow is present while crowns remain shadow-free')
   console.log('[room-recovery] expired member token was replaced and the client rejoined automatically')
   console.log(`[room-recovery] two members present after recovery; expected injected network errors: ${expectedNetworkErrors}; unexpected console errors: 0`)
 } finally {

@@ -33,8 +33,17 @@ const key = process.argv.includes('--key')
   : process.env.DEPLOY_KEY
 const remoteDir = (process.env.DEPLOY_DIR ?? '/opt/dsh-games').replace(/\/+$/, '') || '/'
 
-if (!remoteDir.startsWith('/') || /[\0\r\n]/.test(remoteDir)) {
-  throw new Error('DEPLOY_DIR must be an absolute POSIX path without control characters')
+if (typeof host !== 'string' ||
+    host === '' ||
+    host.startsWith('-') ||
+    /[\0-\x20\x7f]/.test(host)) {
+  throw new Error('DEPLOY_HOST must be a non-empty SSH host without whitespace, control characters, or a leading dash')
+}
+if (!/^\/[A-Za-z0-9._/-]*$/.test(remoteDir) ||
+    remoteDir.split('/').includes('..')) {
+  throw new Error(
+    'DEPLOY_DIR must be an absolute POSIX path without parent traversal, using only letters, numbers, dot, underscore, dash, and slash',
+  )
 }
 
 function shellQuotePosix(value) {
@@ -46,7 +55,11 @@ function remotePath(name) {
 }
 
 function remoteTarget(path) {
-  return `${host}:${shellQuotePosix(path)}`
+  // spawnSync passes one argv value directly to OpenSSH. On Windows, adding
+  // POSIX shell quotes makes them literal filename characters for scp.
+  return process.platform === 'win32'
+    ? `${host}:${path}`
+    : `${host}:${shellQuotePosix(path)}`
 }
 
 function run(cmd, args, opts = {}) {

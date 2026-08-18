@@ -207,13 +207,13 @@ DSH host 进程 (host 半区, lib/index.js)
  ├─ GamesService
  │   ├─ token 账本：监听 session/event（assistant/message 与 usage chunk），
  │   │   按 (sessionId, turn, step) 去重（跨进程持久化 frontier，进程内增量合并），
- │   │   累计写入 $DSH_HOME/games.json；王冠 = token 的 10 进制分解
+ │   │   累计写入 $DSH_HOME/games.json；王冠 = token 按服务器合成基数分解（默认 3 进制）
  │   ├─ 活动相位：activity/status → idle/thinking/tool/done
  │   ├─ 显示/设置：大小/位置/锁定/图案/服务器地址/自定义宠物 meta（$DSH_HOME/pets）
  │   └─ 房间 + 宠物 HTTP 面：gameserver.ts 共享处理器挂载在
  │       /api/games/rooms* 与 /api/games/pets*（CORS 开放）
  ├─ HTTP 路由 /api/games/*：state / nickname / boost / display / config / pet-meta
- └─ settings 命名空间 `games`（enabled / nickname / crownTokenStep / petVariant / serverUrl）
+ └─ settings 命名空间 `games`（enabled / nickname / petVariant / serverUrl / authToken）
 
 独立游戏服务器 (lib/server.js, Docker)
  └─ 与 host 完全相同的共享处理器：房间（公开列表/创建/心跳/离开/清扫）+ 宠物存储
@@ -224,7 +224,7 @@ DSH host 进程 (host 半区, lib/index.js)
 
 - `src/index.ts` — host 入口（服务 + 路由 + 设置区注册）
 - `src/service.ts` — GamesService（账本 / 相位 / 显示 / 配置 / 宠物 meta）
-- `src/crowns.ts` — 王冠等级链、颜色、10 进制分解（host 与浏览器共享）
+- `src/crowns.ts` — 王冠等级链、颜色、按服务器合成基数分解（host 与浏览器共享）
 - `src/ledger.ts` — token 累计纯逻辑（frontier + 增量合并去重）
 - `src/rooms.ts` — 房间存储（代码生成 / 公开-邀请制 / 列表 / 心跳 / 过期清理）
 - `src/pets.ts` — 宠物文件存储（魔数 + 像素校验，原子写）
@@ -243,8 +243,8 @@ DSH host 进程 (host 半区, lib/index.js)
 - `$DSH_HOME/pets/`：上传的自定义宠物图片（本机挂载模式）。
 - 游戏服务器（Docker）：`/data/pets/` 存宠物图片、`/data/config.json` 存规则与
   鉴权密钥；房间是内存态。
-- `$DSH_HOME/settings.yaml` 的 `games:` 段：enabled / nickname / crownTokenStep /
-  petVariant / serverUrl / authToken。
+- `$DSH_HOME/settings.yaml` 的 `games:` 段：enabled / nickname / petVariant /
+  serverUrl / authToken。游戏规则不接受客户端设置，只由游戏服务器提供。
 
 ## 开发
 

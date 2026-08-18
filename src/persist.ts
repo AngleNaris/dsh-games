@@ -82,8 +82,7 @@ export const defaultDisplayConfig: GamesDisplayConfig = {
 export const PETS_DIR = 'pets'
 
 /** Upload limits for custom pet images. */
-export const PET_MAX_BYTES = 2 * 1024 * 1024
-export const PET_MAX_DIMENSION = 1024
+export { PET_MAX_BYTES, PET_MAX_DIMENSION } from './rules.ts'
 
 /** Resolve the persistence directory ($DSH_HOME or ~/.dsh). */
 export function gamesHomeDir(): string {

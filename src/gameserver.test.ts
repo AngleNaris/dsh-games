@@ -121,6 +121,7 @@ describe('game server protocol v3', () => {
 
     const bearer = await json('/api/games/rules', auth())
     expect(bearer.response.status).toBe(200)
+    expect(bearer.body).toEqual({ ok: true, rules: defaultGameRules() })
   })
 
   it('keeps query auth only for native pet image GET compatibility', async () => {

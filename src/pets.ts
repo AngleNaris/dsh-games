@@ -10,7 +10,7 @@
 import { mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { PetMeta } from './persist.ts'
-import type { PetRules } from './gameconfig.ts'
+import type { PetRules } from './rules.ts'
 
 /** Decoded payload of a validated pet image. */
 export interface PetPayload {

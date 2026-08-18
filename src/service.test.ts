@@ -8,6 +8,7 @@ import {
   TOKEN_ACTIVITY_WINDOW_MS,
 } from './service.ts'
 import { crownCounts, crownUnits } from './crowns.ts'
+import { defaultGameRules } from './rules.ts'
 
 const tempDirs: string[] = []
 
@@ -106,20 +107,18 @@ describe('GamesService token activity', () => {
 })
 
 describe('GamesService authoritative rules', () => {
-  it('uses the configured crown step for state, rules, and room anti-cheat', async () => {
+  it('keeps host settings from overriding the in-process server rules', async () => {
     const persistDir = await mkdtemp(join(tmpdir(), 'dsh-games-service-'))
     tempDirs.push(persistDir)
     const service = new GamesService(new Context(), {
       enabled: false,
       persistDir,
-      crownTokenStep: 100,
     })
     const rules = service.gameRules()
-    expect(rules.crown.tokenStep).toBe(100)
-    expect((await service.state()).crownTokenStep).toBe(100)
+    expect(rules).toEqual(defaultGameRules())
 
     const room = service.rooms().createRoom()
-    const tokens = 300
+    const tokens = rules.crown.tokenStep * rules.crown.base
     const joined = service.rooms().joinMember(room.code, {
       memberId: 'member-rule',
       nickname: 'Rules',
@@ -128,5 +127,12 @@ describe('GamesService authoritative rules', () => {
       phase: 'idle',
     })
     expect(joined.ok).toBe(true)
+
+    await service.boost(tokens)
+    const state = await service.state()
+    expect(state.tokens).toBe(tokens)
+    expect(state.crowns)
+      .toEqual(crownCounts(crownUnits(tokens, rules.crown.tokenStep), rules.crown.base))
+    expect(state.crowns[1]).toBe(1)
   })
 })

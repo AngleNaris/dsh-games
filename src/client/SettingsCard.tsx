@@ -18,6 +18,7 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 import { IconChevronDownOutline14 } from '@deepseek-ai/dsh-client-ui-primitives'
 import { gameServerApi, gamesApi, type GameRules, type GamesState } from './api.ts'
 import { formatTokens } from './locales.ts'
+import { defaultGameRules } from '../rules.ts'
 
 /** The registration-side face (empty: the card drives itself via the API). */
 export interface GamesSettingsCardFace {
@@ -44,7 +45,7 @@ export function GamesSettingsCard(props: GamesSettingsCardProps): ReactElement {
   const { t } = props
   const [open, setOpen] = useState(false)
   const [state, setState] = useState<GamesState | null>(null)
-  const [rules, setRules] = useState<GameRules | null>(null)
+  const [rules, setRules] = useState<GameRules>(() => defaultGameRules())
   const [serverUrl, setServerUrl] = useState<Draft<string>>({ text: '', dirty: false })
   const [authToken, setAuthToken] = useState<Draft<string>>({ text: '', dirty: false })
   const [enabledDraft, setEnabledDraft] = useState<boolean | null>(null)
@@ -74,7 +75,7 @@ export function GamesSettingsCard(props: GamesSettingsCardProps): ReactElement {
     gameServerApi.rules(state.serverUrl, state.authToken).then((result) => {
       if (!cancelled) setRules(result.rules)
     }, () => {
-      if (!cancelled) setRules(null)
+      if (!cancelled) setRules(defaultGameRules())
     })
     return () => { cancelled = true }
   }, [state?.serverUrl, state?.authToken])
@@ -143,7 +144,7 @@ export function GamesSettingsCard(props: GamesSettingsCardProps): ReactElement {
 
   const enabledValue = enabledDraft ?? state.enabled
   const visibleValue = visibleDraft ?? state.display.visible
-  const step = rules?.crown.tokenStep ?? state.crownTokenStep
+  const step = rules.crown.tokenStep
 
   return (
     <div className="dsg-settings-card" data-open={open} data-testid="games-settings-card">
@@ -192,17 +193,15 @@ export function GamesSettingsCard(props: GamesSettingsCardProps): ReactElement {
             />
           </div>
 
-          {rules !== null && (
-            <p className="dsg-hint" data-testid="games-rules-note">
-              {t('settings.rulesSummary', {
-                step: formatTokens(step),
-                base: rules.crown.base,
-                levels: rules.crown.levels.length,
-                maxBytes: Math.round(rules.pet.maxBytes / 1024 / 1024 * 10) / 10,
-                maxDimension: rules.pet.maxDimension,
-              })}
-            </p>
-          )}
+          <p className="dsg-hint" data-testid="games-rules-note">
+            {t('settings.rulesSummary', {
+              step: formatTokens(step),
+              base: rules.crown.base,
+              levels: rules.crown.levels.length,
+              maxBytes: Math.round(rules.pet.maxBytes / 1024 / 1024 * 10) / 10,
+              maxDimension: rules.pet.maxDimension,
+            })}
+          </p>
 
           <div className="dsg-actions">
             {saved && <span className="dsg-note">{t('settings.saved')}</span>}

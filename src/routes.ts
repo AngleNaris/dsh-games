@@ -151,8 +151,6 @@ export function makeGamesRoutes(service: GamesService): WebRoute[] {
     })),
     postRoute(`${GAMES_API_PREFIX}/config`, (body) => service.setConfig({
       ...(typeof body.nickname === 'string' ? { nickname: body.nickname } : {}),
-      ...(typeof body.crownTokenStep === 'number' ? { crownTokenStep: body.crownTokenStep } : {}),
-      ...(typeof body.hatTokenStep === 'number' ? { hatTokenStep: body.hatTokenStep } : {}),
       ...(typeof body.enabled === 'boolean' ? { enabled: body.enabled } : {}),
       ...(typeof body.petVariant === 'string' ? { petVariant: body.petVariant } : {}),
       ...(typeof body.serverUrl === 'string' ? { serverUrl: body.serverUrl } : {}),

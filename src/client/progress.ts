@@ -1,9 +1,8 @@
 import {
   crownCounts,
   crownUnits,
-  DEFAULT_CROWN_BASE,
 } from '../crowns.ts'
-import type { GameRules } from './api.ts'
+import { defaultGameRules, type GameRules } from '../rules.ts'
 
 export interface TokenProgressBaseline {
   tokens: number
@@ -17,31 +16,30 @@ export interface TokenProgressResult {
   crownTier: number | null
 }
 
-function crownRule(hostTokenStep: number, rules: GameRules | null): {
+function crownRule(rules: GameRules | null): {
   tokenStep: number
   base: number
   key: string
 } {
-  const tokenStep = rules?.crown.tokenStep ?? hostTokenStep
-  const base = rules?.crown.base ?? DEFAULT_CROWN_BASE
+  const crown = rules?.crown ?? defaultGameRules().crown
+  const tokenStep = crown.tokenStep
+  const base = crown.base
   return { tokenStep, base, key: `${tokenStep}:${base}` }
 }
 
 export function crownsAtTokens(
   tokens: number,
-  hostTokenStep: number,
   rules: GameRules | null,
 ): number[] {
-  const rule = crownRule(hostTokenStep, rules)
+  const rule = crownRule(rules)
   return crownCounts(crownUnits(tokens, rule.tokenStep), rule.base)
 }
 
 export function createTokenProgressBaseline(
   tokens: number,
-  hostTokenStep: number,
   rules: GameRules | null,
 ): TokenProgressBaseline {
-  const rule = crownRule(hostTokenStep, rules)
+  const rule = crownRule(rules)
   return {
     tokens,
     crowns: crownCounts(crownUnits(tokens, rule.tokenStep), rule.base),
@@ -52,10 +50,9 @@ export function createTokenProgressBaseline(
 export function settleTokenProgress(
   previous: TokenProgressBaseline,
   nextTokens: number,
-  hostTokenStep: number,
   rules: GameRules | null,
 ): TokenProgressResult {
-  const rule = crownRule(hostTokenStep, rules)
+  const rule = crownRule(rules)
   const previousCrowns = previous.ruleKey === rule.key
     ? previous.crowns
     : crownCounts(crownUnits(previous.tokens, rule.tokenStep), rule.base)

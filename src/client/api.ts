@@ -12,6 +12,13 @@
  */
 
 import type { MemberPhase } from '../rooms.ts'
+import type { GameRules } from '../rules.ts'
+
+export type {
+  CrownRules,
+  GameRules,
+  PetRules,
+} from '../rules.ts'
 
 /** Meta of the user's custom pet image (mirrored by the host). */
 export interface PetMeta {
@@ -21,39 +28,18 @@ export interface PetMeta {
   height: number
 }
 
-/** Crown rules served by the game server (see gameconfig.ts). */
-export interface CrownRules {
-  tokenStep: number
-  base: number
-  levels: string[]
-}
-
-/** Pet upload rules served by the game server. */
-export interface PetRules {
-  maxBytes: number
-  maxDimension: number
-}
-
-/** The rule set the game server enforces. */
-export interface GameRules {
-  crown: CrownRules
-  pet: PetRules
-}
-
 /** Own-state snapshot (host `/api/games/state`). */
 export interface GamesState {
   memberId: string
   nickname: string
   tokens: number
-  /** Crown units (tokens / crownTokenStep, floored). */
+  /** Crown units derived with the built-in default rules. */
   crownUnits: number
-  /** Crown counts per level, lowest first (host fallback; server rules win). */
+  /** Crown counts per level using the built-in default rules. */
   crowns: number[]
   phase: MemberPhase
   /** Short output-activity window refreshed by assistant stream events. */
   tokenActiveUntil: number
-  /** Tokens per bronze crown (host fallback). */
-  crownTokenStep: number
   /** Master switch (false hides the pet and stops counting). */
   enabled: boolean
   /** Built-in pet pattern variant. */
@@ -250,7 +236,6 @@ export const gamesApi = {
   },
   config(patch: {
     nickname?: string
-    crownTokenStep?: number
     enabled?: boolean
     petVariant?: string
     serverUrl?: string

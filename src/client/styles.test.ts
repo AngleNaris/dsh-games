@@ -90,7 +90,7 @@ describe('injectStyles', () => {
 
   it('uses DSH semantic surfaces for labels and chat in light and dark themes', () => {
     expect(CSS).toMatch(/\.dsg-pet-label \{[^}]*background: var\(--dsw-alias-bg-layer-3[^}]*color: var\(--dsw-alias-label-primary/s)
-    expect(CSS).toMatch(/\.dsg-scene-label \{[^}]*background: var\(--dsw-alias-bg-layer-3[^}]*color: var\(--dsw-alias-label-primary/s)
+    expect(CSS).not.toMatch(/\.dsg-scene-label \{[^}]*(?:background|color|padding|font-size|box-shadow):/s)
     expect(CSS).toMatch(/\.dsg-chat-hint,[^{]*\.dsg-chat-bubble \{[^}]*background: var\(--dsw-alias-bg-layer-3[^}]*color: var\(--dsw-alias-label-primary/s)
     expect(CSS).toMatch(/\.dsg-chat-composer \{[^}]*background: var\(--dsw-alias-bg-layer-3/s)
     expect(CSS).toMatch(/\.dsg-chat-composer \.dsg-chat-input \{[^}]*color: var\(--dsw-alias-label-primary/s)
@@ -98,7 +98,7 @@ describe('injectStyles', () => {
 
   it('shows room labels by default and restores hover-only behavior when disabled', () => {
     expect(CSS).toMatch(/\.dsg-scene-label \{[^}]*opacity: 0/s)
-    expect(CSS).toContain(".dsg-pet[data-show-label='true'] > .dsg-scene-label")
-    expect(CSS).toContain('.dsg-pet:hover > .dsg-scene-label')
+    expect(CSS).toContain(".dsg-pet[data-show-label='true'] > .dsg-pet-label.dsg-scene-label")
+    expect(CSS).toContain('.dsg-pet:hover > .dsg-pet-label.dsg-scene-label')
   })
 })
