@@ -72,7 +72,7 @@ export const DISPLAY_INSET_MAX = 10_000
 
 export const defaultDisplayConfig: GamesDisplayConfig = {
   visible: true,
-  size: 60,
+  size: 100,
   right: 24,
   bottom: 20,
   locked: false,

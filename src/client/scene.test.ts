@@ -88,18 +88,33 @@ describe('arrangeScene', () => {
     expect(distances[0]).toBeGreaterThanOrEqual(110)
   })
 
-  it('never places pets outside the viewport', () => {
+  it('never places pets outside the viewport (edge-sticks, no wrap-around)', () => {
     const crowded = [
       { id: 'me', size: 60 },
       ...Array.from({ length: 10 }, (_, i) => ({ id: `m${i}`, size: 60 })),
     ]
     for (const mode of ['free', 'row', 'column', 'grid', 'orbit'] as const) {
       const out = arrangeScene(mode, crowded, { ...anchor, right: 500, bottom: 400 }, 200, {}, viewport)
-      for (const pos of Object.values(out)) {
+      for (const [id, pos] of Object.entries(out)) {
+        if (id === 'me') continue
         expect(pos.right).toBeGreaterThanOrEqual(0)
         expect(pos.bottom).toBeGreaterThanOrEqual(0)
+        expect(pos.right).toBeLessThanOrEqual(viewport.width - 60)
+        expect(pos.bottom).toBeLessThanOrEqual(viewport.height - 60)
       }
     }
+  })
+
+  it('orbit with a corner anchor sticks overflow members to the nearest edge', () => {
+    // The anchor sits at the bottom-right corner; the ring member straight
+    // above stays inside, the right/bottom ones stick to their edges.
+    const out = arrangeScene('orbit', members, anchor, 110, {}, viewport)
+    // a (index 0) is straight above the anchor: bottom = cy + r - half size.
+    expect(out.a.bottom).toBe(50 + 110 - 30)
+    // b (index 1) goes right of the screen: sticks to the right edge.
+    expect(out.b.right).toBe(0)
+    // c (index 2) goes below the screen: sticks to the bottom edge.
+    expect(out.c.bottom).toBe(0)
   })
 })
 

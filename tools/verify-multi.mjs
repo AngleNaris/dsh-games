@@ -55,12 +55,11 @@ const joinedText = await pageA.textContent('[data-testid="games-room-joined"]')
 const code = joinedText.match(/[A-Z2-9]{4}/)[0]
 console.log(`[multi] A created room ${code}`)
 
-// B joins A's room.
+// B joins A's room using the server URL configured in plugin settings.
 await pageB.click('[data-testid="games-pet"]')
 await pageB.waitForSelector('[data-testid="games-popover"]')
 // The join form: click 用代码加入 (ghost button next to 创建房间).
 await pageB.click('[data-testid="games-room-empty"] button:has-text("用代码加入")')
-await pageB.fill('#dsg-room-url', A)
 await pageB.fill('#dsg-room-code', code)
 await pageB.click('[data-testid="games-room-join"]')
 await pageB.waitForSelector('[data-testid="games-room-joined"]', { timeout: 8_000 })

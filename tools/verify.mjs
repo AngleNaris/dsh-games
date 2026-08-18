@@ -82,21 +82,26 @@ await shot(page, '03-room-created')
 const roomCode = (await page.textContent('[data-testid="games-room-joined"]')).match(/[A-Z2-9]{4}/)?.[0]
 console.log(`[verify] room code: ${roomCode}`)
 
-// 8. Add a second member via the API (with crowns), then check the list.
-const heartbeat = await fetch(`${BASE}/api/games/rooms/${roomCode}/members`, {
+const ownState = await (await fetch(`${BASE}/api/games/state`)).json()
+const serverHeaders = ownState.authToken === ''
+  ? {}
+  : { authorization: `Bearer ${ownState.authToken}` }
+
+// 8. Join a second member via protocol v3, then check the list.
+const bobJoin = await fetch(`${BASE}/api/games/rooms/${roomCode}/join`, {
   method: 'POST',
-  headers: { 'content-type': 'application/json' },
+  headers: { 'content-type': 'application/json', ...serverHeaders },
   body: JSON.stringify({
     member: {
       memberId: 'player-bob',
       nickname: 'Bob',
-      tokens: 245_000_000,
-      crowns: [2, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      tokens: 10,
+      crowns: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       phase: 'thinking',
     },
   }),
 })
-console.log(`[verify] bob heartbeat: ${heartbeat.status}`)
+console.log(`[verify] bob join: ${bobJoin.status}`)
 await page.waitForTimeout(4_000) // next room poll
 await shot(page, '04-room-members')
 const memberCount = await page.locator('[data-testid="games-room-members"] .dsg-member').count()
@@ -122,9 +127,9 @@ console.log(`[verify] pet label final: ${labelFinal}`)
 // 10. Custom pet upload via the API (a real PNG), then the pet turns into an
 // image and the room heartbeat carries its URL.
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
-const upload = await fetch(`${BASE}/api/games/pets/${(await (await fetch(`${BASE}/api/games/state`)).json()).memberId}`, {
+const upload = await fetch(`${BASE}/api/games/pets/${ownState.memberId}`, {
   method: 'POST',
-  headers: { 'content-type': 'image/png' },
+  headers: { 'content-type': 'image/png', ...serverHeaders },
   body: new Uint8Array(png),
 })
 const uploadJson = await upload.json()
@@ -170,7 +175,7 @@ if (await settingsButton.count()) {
 }
 
 // 12. The room list on the server includes the public room just created.
-const list = await (await fetch(`${BASE}/api/games/rooms`)).json()
+const list = await (await fetch(`${BASE}/api/games/rooms`, { headers: serverHeaders })).json()
 console.log(`[verify] server room list: ${list.rooms.map((r) => `${r.code}${r.public ? '' : '(invite)'}`).join(', ')}`)
 
 console.log(`[verify] console errors: ${consoleErrors.length}`)

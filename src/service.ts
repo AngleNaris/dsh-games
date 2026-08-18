@@ -22,6 +22,10 @@ import {
   DEFAULT_CROWN_TOKEN_STEP,
 } from './crowns.ts'
 import {
+  DEFAULT_GAME_SERVER_AUTH_TOKEN,
+  DEFAULT_GAME_SERVER_URL,
+} from './default-server.ts'
+import {
   DEFAULT_NICKNAME,
   DISPLAY_INSET_MAX,
   DISPLAY_SIZE_MAX,
@@ -36,12 +40,13 @@ import {
   type PetMeta,
 } from './persist.ts'
 import {
-  normalizePhase,
   RoomStore,
   type MemberPhase,
   type RoomStoreOptions,
 } from './rooms.ts'
 import { PetStore } from './pets.ts'
+import { AntiCheatGuard, normalizeAntiCheatPolicy } from './anticheat.ts'
+import { defaultGameRules } from './gameconfig.ts'
 
 /** Settings-section shape the web settings surface edits. */
 export interface GamesSection {
@@ -55,7 +60,7 @@ export interface GamesSection {
   petVariant: string
   /** Game-server base URL ('' = same-origin in-process mount). */
   serverUrl: string
-  /** Shared secret for the game server (?token=…), '' = open. */
+  /** Shared secret for the game server (Bearer auth), '' = open. */
   authToken: string
 }
 
@@ -93,6 +98,8 @@ export interface GamesStateView {
   crowns: number[]
   /** Current model-activity phase. */
   phase: MemberPhase
+  /** Short output-activity window refreshed by assistant stream events. */
+  tokenActiveUntil: number
   /** Tokens per crown in effect (host fallback; server rules win). */
   crownTokenStep: number
   /** Master switch (false hides the pet and stops counting). */
@@ -157,8 +164,8 @@ interface BusEvent {
   data?: unknown
 }
 
-/** Known model-activity phases (the set the harness activity tracker emits). */
-const ACTIVITY_PHASES: readonly string[] = ['idle', 'waiting', 'thinking', 'tool', 'done']
+/** Keep output activity visible long enough for the browser's 2s state poll. */
+export const TOKEN_ACTIVITY_WINDOW_MS = 3_000
 
 /** Default pet pattern variant. */
 export const DEFAULT_PET_VARIANT = 'default'
@@ -182,6 +189,7 @@ export class GamesService extends Service {
   private readonly authTokenDefault: string
   private sectionSource: (() => GamesSection) | undefined
   private phase: MemberPhase = 'idle'
+  private tokenActiveUntil = 0
   private enabled: boolean
   private disposeListeners: (() => void) | undefined
   private sweepTimer: NodeJS.Timeout | undefined
@@ -190,12 +198,24 @@ export class GamesService extends Service {
     super(ctx, 'games')
     this.persistDir = config.persistDir ?? gamesHomeDir()
     this.persist = loadGamesPersist(this.persistDir)
-    this.roomStore = new RoomStore(config)
+    const rules = defaultGameRules()
+    this.roomStore = new RoomStore({
+      ...config,
+      antiCheat: new AntiCheatGuard({
+        rules: rules.crown,
+        policy: normalizeAntiCheatPolicy(undefined),
+        stateFile: join(this.persistDir, 'anticheat.json'),
+      }),
+    })
     this.petStore = new PetStore(this.petDir())
     this.crownTokenStepDefault = config.crownTokenStep ?? config.hatTokenStep ?? DEFAULT_CROWN_TOKEN_STEP
     this.petVariantDefault = config.petVariant ?? DEFAULT_PET_VARIANT
-    this.serverUrlDefault = typeof config.serverUrl === 'string' ? config.serverUrl.trim() : ''
-    this.authTokenDefault = typeof config.authToken === 'string' ? config.authToken.trim() : ''
+    this.serverUrlDefault = typeof config.serverUrl === 'string'
+      ? config.serverUrl.trim()
+      : DEFAULT_GAME_SERVER_URL
+    this.authTokenDefault = typeof config.authToken === 'string'
+      ? config.authToken.trim()
+      : DEFAULT_GAME_SERVER_AUTH_TOKEN
     this.enabled = config.enabled ?? true
     this.setEnabled(this.enabled)
   }
@@ -232,7 +252,7 @@ export class GamesService extends Service {
           this.onSessionEvent(session.id, event)
         }),
         this.ctx.on('session/disposed', () => {
-          this.phase = 'idle'
+          this.onSessionDisposed()
         }),
       ]
       return () => { for (const dispose of disposers) dispose() }
@@ -264,24 +284,51 @@ export class GamesService extends Service {
 
   private onSessionEvent(sessionId: string, event: BusEvent): void {
     switch (event.type) {
+      case 'turn/start':
+        this.phase = 'waiting'
+        return
+      case 'step/start':
+        this.phase = 'thinking'
+        return
       case 'assistant/message': {
         const data = (event.data ?? {}) as { turn?: number; step?: number; usage?: UsageLike }
+        // Refresh the short tail even when the provider emits only one final
+        // message. session/disposed may follow immediately, before the client
+        // poll can observe the output activity.
+        this.markTokenActivity()
         this.countUsage(sessionId, data, data.usage)
         return
       }
       case 'assistant/chunk': {
         const data = (event.data ?? {}) as { turn?: number; step?: number; chunk?: { type?: string; usage?: UsageLike } }
-        if (data.chunk?.type === 'usage') this.countUsage(sessionId, data, data.chunk.usage)
+        if (data.chunk?.type === 'usage') {
+          this.countUsage(sessionId, data, data.chunk.usage)
+        } else {
+          this.markTokenActivity()
+        }
         return
       }
-      case 'activity/status': {
-        const payload = (event.data ?? {}) as { phase?: unknown }
-        if (typeof payload.phase !== 'string') return
-        if (!ACTIVITY_PHASES.includes(payload.phase)) return
-        this.phase = normalizePhase(payload.phase)
+      case 'tool/call':
+        this.phase = 'tool'
         return
-      }
+      case 'tool/result':
+        this.phase = 'thinking'
+        return
+      case 'step/end':
+        this.phase = 'done'
+        return
+      case 'turn/end':
+        this.phase = 'idle'
+        return
     }
+  }
+
+  private onSessionDisposed(): void {
+    this.phase = 'idle'
+  }
+
+  private markTokenActivity(): void {
+    this.tokenActiveUntil = Date.now() + TOKEN_ACTIVITY_WINDOW_MS
   }
 
   private countUsage(sessionId: string, data: { turn?: number; step?: number }, usage: UsageLike | undefined): void {
@@ -439,6 +486,7 @@ export class GamesService extends Service {
       crownUnits: units,
       crowns: crownCounts(units, DEFAULT_CROWN_BASE),
       phase: this.phase,
+      tokenActiveUntil: this.tokenActiveUntil,
       crownTokenStep,
       enabled: this.enabled,
       petVariant: section.petVariant ?? this.petVariantDefault,

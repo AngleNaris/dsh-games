@@ -20,9 +20,9 @@ services:
       - GAME_DATA=/data
     volumes:
       - ./data:/data
-    # 无 token 请求返回 401 = 服务在跑且鉴权已启用（authToken 配置在 data/config.json）
+    # 健康端点公开；业务 API 仍由 data/config.json 中的 authToken 保护。
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3080/api/games/rules').then(r=>{if(r.status!==401)process.exit(1)}).catch(()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3080/api/games/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3

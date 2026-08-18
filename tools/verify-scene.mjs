@@ -35,15 +35,18 @@ const post = (url, body) => fetch(url, {
 // ---- snapshot and localize the instances (restored at the end) ----
 const stateA = await fetch(`${A}/api/games/state`).then((r) => r.json())
 const stateB = await fetch(`${B}/api/games/state`).then((r) => r.json())
-const origA = { serverUrl: stateA.serverUrl, authToken: stateA.authToken }
-const origB = { serverUrl: stateB.serverUrl, authToken: stateB.authToken }
+const origA = { serverUrl: stateA.serverUrl, authToken: stateA.authToken, petVariant: stateA.petVariant }
+const origB = { serverUrl: stateB.serverUrl, authToken: stateB.authToken, petVariant: stateB.petVariant }
+const origDisplayA = stateA.display
+const origDisplayB = stateB.display
 const restore = async () => {
   await post(`${A}/api/games/config`, origA).catch(() => {})
   await post(`${B}/api/games/config`, origB).catch(() => {})
-  await post(`${B}/api/games/config`, { petVariant: stateB.petVariant }).catch(() => {})
+  await post(`${A}/api/games/display`, origDisplayA).catch(() => {})
+  await post(`${B}/api/games/display`, origDisplayB).catch(() => {})
 }
 await post(`${A}/api/games/config`, { serverUrl: '', authToken: '' })
-await post(`${B}/api/games/config`, { serverUrl: '', authToken: '' })
+await post(`${B}/api/games/config`, { serverUrl: A, authToken: '' })
 
 const browser = await chromium.launch()
 try {
@@ -59,7 +62,7 @@ try {
   // Both pets visible at the default 60px; B flips to the ocean pattern so the
   // protocol round-trip of petVariant is observable.
   for (const base of [A, B]) {
-    await post(`${base}/api/games/display`, { visible: true, size: 60, right: 24, bottom: 20 })
+    await post(`${base}/api/games/display`, { visible: true, size: 100, right: 24, bottom: 20 })
   }
   await post(`${B}/api/games/config`, { petVariant: 'ocean' })
   // Hide B's dsh-pet whale girl so only our pets are on stage.
@@ -114,7 +117,6 @@ try {
   await pageB.click('[data-testid="games-pet"]')
   await pageB.waitForSelector('[data-testid="games-popover"]')
   await pageB.click('[data-testid="games-room-empty"] button:has-text("用代码加入")')
-  await pageB.fill('#dsg-room-url', A)
   await pageB.fill('#dsg-room-code', code)
   await pageB.click('[data-testid="games-room-join"]')
   await pageB.waitForSelector('[data-testid="games-room-joined"]', { timeout: 8_000 })
@@ -185,7 +187,7 @@ try {
   console.log('[scene] orbit mode: on the 110px ring')
   await pageA.screenshot({ path: join(ARTIFACTS, '23-scene-orbit.png') })
 
-  // ---- grid: drag snaps to the 60px grid ----
+  // ---- grid: drag snaps to the spacing grid (default 110px) ----
   await clickMode('网格吸附')
   const gridBox = await scenePets.first().boundingBox()
   await pageA.mouse.move(gridBox.x + gridBox.width / 2, gridBox.y + gridBox.height / 2)
@@ -196,8 +198,8 @@ try {
   const snapped = await scenePets.first().boundingBox()
   const right = windowRight(snapped)
   const bottom = windowBottom(snapped)
-  if (right % 60 !== 0 || bottom % 60 !== 0) {
-    throw new Error(`grid mode: drag ended at (${right},${bottom}), not on the 60px grid`)
+  if (right % 110 !== 0 || bottom % 110 !== 0) {
+    throw new Error(`grid mode: drag ended at (${right},${bottom}), not on the 110px grid`)
   }
   console.log(`[scene] grid mode: dragged to grid cell (${right},${bottom})`)
   await pageA.screenshot({ path: join(ARTIFACTS, '24-scene-grid.png') })
@@ -205,14 +207,21 @@ try {
   // ---- free: drag is remembered ----
   await clickMode('自由')
   const freeBox = await scenePets.first().boundingBox()
-  await pageA.mouse.move(freeBox.x + freeBox.width / 2, freeBox.y + freeBox.height / 2)
+  const dragFromX = freeBox.x + freeBox.width / 2
+  const dragFromY = freeBox.y + freeBox.height / 2
+  const dragToX = freeBox.x - 120
+  const dragToY = freeBox.y - 90
+  await pageA.mouse.move(dragFromX, dragFromY)
   await pageA.mouse.down()
-  await pageA.mouse.move(freeBox.x - 120, freeBox.y - 90, { steps: 8 })
+  await pageA.mouse.move(dragToX, dragToY, { steps: 8 })
   await pageA.mouse.up()
   await pageA.waitForTimeout(400)
   const moved = await scenePets.first().boundingBox()
-  if (Math.abs(moved.x - (freeBox.x - 120)) > 4 || Math.abs(moved.y - (freeBox.y - 90)) > 4) {
-    throw new Error(`free mode: drag not remembered (${Math.round(moved.x)},${Math.round(moved.y)})`)
+  // The pet follows the pointer: x shifts by (dragToX - dragFromX) etc.
+  const expectX = freeBox.x + (dragToX - dragFromX)
+  const expectY = freeBox.y + (dragToY - dragFromY)
+  if (Math.abs(moved.x - expectX) > 4 || Math.abs(moved.y - expectY) > 4) {
+    throw new Error(`free mode: drag not remembered (${Math.round(moved.x)},${Math.round(moved.y)}) vs (${Math.round(expectX)},${Math.round(expectY)})`)
   }
   console.log('[scene] free mode: drag remembered')
 
@@ -247,8 +256,14 @@ try {
   await pageA.screenshot({ path: join(ARTIFACTS, '27-scene-popover-light.png') })
 
   // Leave the room so no stale seat stays stored.
-  await pageA.evaluate(() => localStorage.removeItem('dsh.games.room.v1'))
-  await pageB.evaluate(() => localStorage.removeItem('dsh.games.room.v1'))
+  await pageA.evaluate(() => {
+    localStorage.removeItem('dsh.games.room.v1')
+    localStorage.removeItem('dsh.games.room.v3')
+  })
+  await pageB.evaluate(() => {
+    localStorage.removeItem('dsh.games.room.v1')
+    localStorage.removeItem('dsh.games.room.v3')
+  })
 
   console.log(`[scene] console errors: ${errors.length}`)
   for (const e of errors) console.log(`  - ${e}`)

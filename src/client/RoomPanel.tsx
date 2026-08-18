@@ -5,12 +5,11 @@
  * @module @linxin666/dsh-games/client/RoomPanel
  */
 
-import { useCallback, useEffect, useState, type ReactElement } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
 import type { Translate } from '@deepseek-ai/dsh-client-ui-slots'
 import {
   gameServerApi,
   normalizeRoomCode,
-  normalizeServerUrl,
   type GamesState,
   type JoinedRoom,
   type RoomView,
@@ -26,8 +25,8 @@ interface RoomPanelProps {
   own: GamesState
   /** Last join/create error from the parent. */
   error: string | null
-  onCreate: (options: { name?: string; public?: boolean }) => void
-  onJoin: (base: string, code: string) => void
+  onCreate: (options: { name?: string; public?: boolean }) => Promise<boolean>
+  onJoin: (code: string) => Promise<boolean>
   onLeave: () => void
 }
 
@@ -116,17 +115,12 @@ export function RoomPanel(props: RoomPanelProps): ReactElement {
   const [publicRooms, setPublicRooms] = useState<RoomView[]>([])
   const [listBusy, setListBusy] = useState(false)
   const [listNote, setListNote] = useState<string | null>(null)
-  const [urlDraft, setUrlDraft] = useState('')
   const [codeDraft, setCodeDraft] = useState('')
   const [roomNameDraft, setRoomNameDraft] = useState('')
   const [roomPublic, setRoomPublic] = useState(true)
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
-
-  // Prefill the server URL with the configured game server.
-  useEffect(() => {
-    setUrlDraft(normalizeServerUrl(own.serverUrl))
-  }, [own.serverUrl])
+  const busyRef = useRef(false)
 
   const refreshList = useCallback(async (): Promise<void> => {
     setListBusy(true)
@@ -149,20 +143,26 @@ export function RoomPanel(props: RoomPanelProps): ReactElement {
     }
   }, [room === null, own.serverUrl, refreshList])
 
-  const doCreate = (): void => {
+  const runBusy = async (operation: () => Promise<boolean>): Promise<void> => {
+    if (busyRef.current) return
+    busyRef.current = true
     setBusy(true)
-    props.onCreate({ name: roomNameDraft.trim() || undefined, public: roomPublic })
-    setBusy(false)
+    try {
+      await operation()
+    } finally {
+      busyRef.current = false
+      setBusy(false)
+    }
+  }
+
+  const doCreate = (): void => {
+    void runBusy(() => props.onCreate({ name: roomNameDraft.trim() || undefined, public: roomPublic }))
   }
 
   const doJoin = (): void => {
-    // An empty URL is valid: it means the same-origin game-server mount.
-    const url = normalizeServerUrl(urlDraft)
     const code = normalizeRoomCode(codeDraft)
     if (code === '') return
-    setBusy(true)
-    props.onJoin(url, code)
-    setBusy(false)
+    void runBusy(() => props.onJoin(code))
   }
 
   const copyRoom = async (): Promise<void> => {
@@ -196,12 +196,11 @@ export function RoomPanel(props: RoomPanelProps): ReactElement {
               <RoomListRow
                 key={entry.code}
                 t={t}
-                room={entry}
-                busy={listBusy}
-                onJoin={(code) => {
-                  // '' (same-origin mount) is a valid base — pass it through.
-                  props.onJoin(normalizeServerUrl(urlDraft), code)
-                }}
+                  room={entry}
+                  busy={busy || listBusy}
+                  onJoin={(code) => {
+                    void runBusy(() => props.onJoin(code))
+                  }}
               />
             ))}
             {publicRooms.length === 0 && listNote !== null && <p className="dsg-hint">{listNote}</p>}
@@ -243,23 +242,18 @@ export function RoomPanel(props: RoomPanelProps): ReactElement {
               <button type="button" className="dsg-btn" disabled={busy} onClick={doCreate} data-testid="games-room-create">
                 {t('room.create')}
               </button>
-              <button type="button" className="dsg-btn-ghost" onClick={() => setMode('join')}>
+              <button
+                type="button"
+                className="dsg-btn-ghost"
+                data-testid="games-room-mode-join"
+                onClick={() => setMode('join')}
+              >
                 {t('room.joinByCode')}
               </button>
             </div>
           </div>
         ) : (
           <div>
-            <div className="dsg-field">
-              <label htmlFor="dsg-room-url">{t('room.url')}</label>
-              <input
-                id="dsg-room-url"
-                className="dsg-input"
-                value={urlDraft}
-                placeholder={t('room.urlPlaceholder')}
-                onChange={(e) => setUrlDraft(e.target.value)}
-              />
-            </div>
             <div className="dsg-field">
               <label htmlFor="dsg-room-code">{t('room.code')}</label>
               <input
@@ -270,12 +264,12 @@ export function RoomPanel(props: RoomPanelProps): ReactElement {
                 placeholder={t('room.codePlaceholder')}
                 onChange={(e) => setCodeDraft(e.target.value.toUpperCase())}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') doJoin()
+                  if (e.key === 'Enter' && !busy) doJoin()
                 }}
               />
             </div>
             <div className="dsg-row">
-              <button type="button" className="dsg-btn" disabled={busy || urlDraft.trim() === '' || codeDraft.trim() === ''} onClick={doJoin} data-testid="games-room-join">
+              <button type="button" className="dsg-btn" disabled={busy || codeDraft.trim() === ''} onClick={doJoin} data-testid="games-room-join">
                 {t('room.join')}
               </button>
               <button type="button" className="dsg-btn-ghost" onClick={() => setMode('list')}>
@@ -291,7 +285,7 @@ export function RoomPanel(props: RoomPanelProps): ReactElement {
   }
 
   return (
-    <div data-testid="games-room-joined">
+    <div data-testid="games-room-joined" data-room-code={room.code}>
       <div className="dsg-row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
         <strong>{room.name !== '' ? room.name : t('room.title')}</strong>
         <button type="button" className="dsg-btn-danger dsg-btn-ghost" onClick={props.onLeave} data-testid="games-room-leave">
@@ -307,7 +301,7 @@ export function RoomPanel(props: RoomPanelProps): ReactElement {
             </span>
             <span style={{ fontSize: 11, opacity: 0.7, display: 'block' }}>{room.base}</span>
           </span>
-          <button type="button" className="dsg-btn-ghost" onClick={() => { void copyRoom() }}>
+          <button type="button" className="dsg-btn-ghost dsg-room-copy" onClick={() => { void copyRoom() }}>
             {copied ? t('room.copied') : t('room.copy')}
           </button>
         </div>

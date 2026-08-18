@@ -15,6 +15,7 @@ import type { GamesService } from './service.ts'
 import { defaultGameRules } from './gameconfig.ts'
 import {
   handleGameServer,
+  HEALTH_API_PATH,
   PET_API_PREFIX,
   ROOM_API_PREFIX,
   RULES_API_PATH,
@@ -210,6 +211,18 @@ export function makeGamesRoutes(service: GamesService): WebRoute[] {
       // the standalone server reads its config.json).
       kind: 'exact',
       path: RULES_API_PATH,
+      handler: (req: IncomingMessage, res: ServerResponse): void | Promise<void> => {
+        return handleGameServer(req, res, {
+          rooms: service.rooms(),
+          pets: service.pets(),
+          rules: defaultGameRules(),
+          ...(service.authToken() !== '' ? { authToken: service.authToken() } : {}),
+        })
+      },
+    },
+    {
+      kind: 'exact',
+      path: HEALTH_API_PATH,
       handler: (req: IncomingMessage, res: ServerResponse): void | Promise<void> => {
         return handleGameServer(req, res, {
           rooms: service.rooms(),

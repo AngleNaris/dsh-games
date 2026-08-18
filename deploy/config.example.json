@@ -19,5 +19,14 @@
   "pet": {
     "maxBytes": 2097152,
     "maxDimension": 1024
+  },
+  "antiCheat": {
+    "burstTokens": 500000,
+    "tokensPerMinute": 1000000,
+    "strikeLimit": 3,
+    "strikeWindowMs": 600000,
+    "lockMs": 60000,
+    "retentionMs": 2592000000,
+    "maxEntries": 10000
   }
 }

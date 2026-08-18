@@ -24,6 +24,7 @@ import type { RoomMemberView } from './api.ts'
 import { formatTokens } from './locales.ts'
 import { DeepSeekWhale } from './whale.tsx'
 import { MiniCrown } from './crowns.tsx'
+import { ChatBubble } from './chat.tsx'
 
 /** Arrangement modes (order is the UI order too). */
 export type ArrangeMode = 'free' | 'row' | 'column' | 'grid' | 'orbit'
@@ -101,7 +102,9 @@ function defaultPos(anchor: SceneAnchor, member: SceneMember, spacing: number, i
 
 /**
  * Compute every member's position for the current mode. The anchor keeps its
- * own spot in every mode; `members` must include the anchor.
+ * own spot in every mode; `members` must include the anchor. All member
+ * positions are clamped inside the viewport (a pet that would leave the
+ * screen sticks to the nearest edge instead of jumping to the opposite one).
  */
 export function arrangeScene(
   mode: ArrangeMode,
@@ -120,7 +123,7 @@ export function arrangeScene(
       const raw = free[member.id] ?? defaultPos(anchor, member, gap, index)
       out[member.id] = mode === 'grid' ? snapPos(raw, gap) : raw
     })
-    return out
+    return clampAll(out, others, viewport)
   }
 
   if (mode === 'row') {
@@ -130,20 +133,20 @@ export function arrangeScene(
     let leftCursor = anchor.right + anchor.size / 2 + gap
     for (const member of lefts) {
       out[member.id] = {
-        right: Math.max(0, Math.round(leftCursor + member.size / 2)),
-        bottom: Math.max(0, Math.round(anchor.bottom + (anchor.size - member.size) / 2)),
+        right: Math.round(leftCursor + member.size / 2),
+        bottom: Math.round(anchor.bottom + (anchor.size - member.size) / 2),
       }
       leftCursor += member.size + gap
     }
     let rightCursor = anchor.right - anchor.size / 2 - gap
     for (const member of rights) {
       out[member.id] = {
-        right: Math.max(0, Math.round(rightCursor - member.size / 2)),
-        bottom: Math.max(0, Math.round(anchor.bottom + (anchor.size - member.size) / 2)),
+        right: Math.round(rightCursor - member.size / 2),
+        bottom: Math.round(anchor.bottom + (anchor.size - member.size) / 2),
       }
       rightCursor -= member.size + gap
     }
-    return out
+    return clampAll(out, others, viewport)
   }
 
   if (mode === 'column') {
@@ -153,20 +156,20 @@ export function arrangeScene(
     let upCursor = anchor.bottom - anchor.size / 2 - gap
     for (const member of ups) {
       out[member.id] = {
-        right: Math.max(0, Math.round(anchor.right + (anchor.size - member.size) / 2)),
-        bottom: Math.max(0, Math.round(upCursor - member.size / 2)),
+        right: Math.round(anchor.right + (anchor.size - member.size) / 2),
+        bottom: Math.round(upCursor - member.size / 2),
       }
       upCursor -= member.size + gap
     }
     let downCursor = anchor.bottom + anchor.size / 2 + gap
     for (const member of downs) {
       out[member.id] = {
-        right: Math.max(0, Math.round(anchor.right + (anchor.size - member.size) / 2)),
-        bottom: Math.max(0, Math.round(downCursor + member.size / 2)),
+        right: Math.round(anchor.right + (anchor.size - member.size) / 2),
+        bottom: Math.round(downCursor + member.size / 2),
       }
       downCursor += member.size + gap
     }
-    return out
+    return clampAll(out, others, viewport)
   }
 
   // orbit: even ring around the anchor center, starting straight above.
@@ -178,12 +181,30 @@ export function arrangeScene(
     others.forEach((member, index) => {
       const theta = -Math.PI / 2 + (2 * Math.PI * index) / n
       const mx = cx + radius * Math.cos(theta)
-      const my = cy + radius * Math.sin(theta)
+      // bottom grows upward, so the y-axis flips vs the screen's sin sign.
+      const my = cy - radius * Math.sin(theta)
       out[member.id] = {
-        right: Math.max(0, Math.round(viewport.width - mx - member.size / 2)),
-        bottom: Math.max(0, Math.round(my - member.size / 2)),
+        right: Math.round(viewport.width - mx - member.size / 2),
+        bottom: Math.round(my - member.size / 2),
       }
     })
+  }
+  return clampAll(out, others, viewport)
+}
+
+/** Clamp member positions into the viewport (edge-sticking, not wrapping). */
+function clampAll(
+  out: Record<string, PetPos>,
+  others: readonly SceneMember[],
+  viewport: SceneViewport,
+): Record<string, PetPos> {
+  for (const member of others) {
+    const pos = out[member.id]
+    if (pos === undefined) continue
+    out[member.id] = {
+      right: Math.min(Math.max(0, pos.right), Math.max(0, viewport.width - member.size)),
+      bottom: Math.min(Math.max(0, pos.bottom), Math.max(0, viewport.height - member.size)),
+    }
   }
   return out
 }
@@ -258,8 +279,10 @@ export function MemberPetScene(props: {
   /** False in auto-arrange modes: the layout owns the position. */
   draggable: boolean
   onMove: (pos: PetPos) => void
+  /** Incoming chat bubble (null when none). */
+  chat?: { text: string; key: string; leaving?: boolean } | null
 }): ReactElement {
-  const { member, size, pos, draggable, onMove } = props
+  const { member, size, pos, draggable, onMove, chat } = props
   const dragRef = useRef<{ startX: number; startY: number; right: number; bottom: number } | null>(null)
 
   const onPointerDown = (event: React.PointerEvent): void => {
@@ -275,12 +298,20 @@ export function MemberPetScene(props: {
     const bottom = Math.max(0, start.bottom - (event.clientY - start.startY))
     onMove({ right, bottom })
   }
-  const onPointerUp = (): void => {
+  const stopDrag = (): void => {
     dragRef.current = null
   }
+  useEffect(() => {
+    window.addEventListener('blur', stopDrag)
+    return () => window.removeEventListener('blur', stopDrag)
+  }, [])
 
   const hasCrowns = member.crowns.some((count) => count > 0)
   const label = `${member.nickname} · ${formatTokens(member.tokens)}`
+  const active = member.active === true ||
+    member.phase === 'waiting' ||
+    member.phase === 'thinking' ||
+    member.phase === 'tool'
   return (
     <span
       className="dsg-pet-root dsg-scene-root"
@@ -290,26 +321,35 @@ export function MemberPetScene(props: {
     >
       <span
         className="dsg-pet"
+        data-active={active}
         data-phase={member.phase}
+        data-token-active={member.active === true}
         title={label}
         aria-label={label}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
+        onPointerUp={stopDrag}
+        onPointerCancel={stopDrag}
+        onLostPointerCapture={stopDrag}
       >
-        {hasCrowns && <MiniCrown counts={member.crowns} size={Math.max(10, Math.round(size * 0.55))} />}
-        {member.petUrl !== undefined && member.petUrl !== ''
-          ? (
-            <img
-              className="dsg-pet-img"
-              src={member.petUrl}
-              alt={member.nickname}
-              draggable={false}
-              style={{ width: size, height: size }}
-            />
-          )
-          : <DeepSeekWhale size={size} title={member.nickname} variant={member.petVariant} />}
-        <span className="dsg-phase-dot" data-phase={member.phase} />
+        <span className="dsg-whale-wrap">
+          <span className="dsg-whale-breathe">
+            {hasCrowns && <MiniCrown counts={member.crowns} size={Math.max(10, Math.round(size * 0.55))} />}
+            {member.petUrl !== undefined && member.petUrl !== ''
+              ? (
+                <img
+                  className="dsg-pet-img"
+                  src={member.petUrl}
+                  alt={member.nickname}
+                  draggable={false}
+                  style={{ width: size, height: size }}
+                />
+              )
+              : <DeepSeekWhale size={size} title={member.nickname} variant={member.petVariant} />}
+          </span>
+        </span>
+        {chat !== null && chat !== undefined &&
+          <ChatBubble key={chat.key} text={chat.text} from={member.nickname} leaving={chat.leaving} />}
         <span className="dsg-scene-label">{label}</span>
       </span>
     </span>

@@ -1,6 +1,6 @@
 {
   "name": "@linxin666/dsh-games",
-  "description": "DSH 趣味编程插件：桌面宠物（DeepSeek 鲸鱼/自定义图案）+ 王冠成长（每 100M token 一顶青铜王冠，10 合 1 升级，魔法王冠带附魔特效）+ 多人房间（公开/邀请制 + 房间列表 + 自动回房）+ 可 Docker 部署的独立游戏服务器",
+  "description": "DSH 趣味编程插件：桌面宠物（DeepSeek 鲸鱼/自定义图案）+ 王冠成长（每 1M token 一顶青铜王冠，3 合 1 升级，魔法王冠带附魔特效）+ 多人房间（公开/邀请制 + 房间列表 + 自动回房）+ 可 Docker 部署的独立游戏服务器",
   "version": "0.1.0",
   "type": "module",
   "packageManager": "pnpm@11.20.0",
@@ -68,7 +68,8 @@
     "@deepseek-ai/dsh-session": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-settings": "^0.1.0-rc.6",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.6"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
@@ -89,6 +90,7 @@
     "react-dom": "^18.3.1",
     "tsdown": "^0.22.2",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.6"
   }
 }

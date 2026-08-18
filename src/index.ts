@@ -17,6 +17,10 @@ import {
   NICKNAME_MAX_LENGTH,
 } from './persist.ts'
 import { DEFAULT_CROWN_TOKEN_STEP } from './crowns.ts'
+import {
+  DEFAULT_GAME_SERVER_AUTH_TOKEN,
+  DEFAULT_GAME_SERVER_URL,
+} from './default-server.ts'
 import { makeGamesRoutes } from './routes.ts'
 import {
   DEFAULT_PET_VARIANT,
@@ -74,6 +78,10 @@ export {
   crownUnits,
   DEFAULT_CROWN_TOKEN_STEP,
 } from './crowns.ts'
+export {
+  DEFAULT_GAME_SERVER_AUTH_TOKEN,
+  DEFAULT_GAME_SERVER_URL,
+} from './default-server.ts'
 
 /** Stable cordis plugin name (matches cordis.patch.yml insert id). */
 export const name = 'games'
@@ -87,8 +95,8 @@ export const GAMES_SETTINGS_SCHEMA = z.object({
   nickname: z.string().min(1).max(NICKNAME_MAX_LENGTH).pattern(/\S/).default(DEFAULT_NICKNAME),
   crownTokenStep: z.number().step(1).min(1).max(1_000_000_000_000).default(DEFAULT_CROWN_TOKEN_STEP),
   petVariant: z.string().min(1).max(64).default(DEFAULT_PET_VARIANT),
-  serverUrl: z.string().max(512).default(''),
-  authToken: z.string().max(256).default(''),
+  serverUrl: z.string().max(512).default(DEFAULT_GAME_SERVER_URL),
+  authToken: z.string().max(256).default(DEFAULT_GAME_SERVER_AUTH_TOKEN),
 })
 
 /**
@@ -108,8 +116,12 @@ export function apply(ctx: Context, config: GamesConfig = {}): void {
     nickname: service.nickname(),
     crownTokenStep: config.crownTokenStep ?? config.hatTokenStep ?? DEFAULT_CROWN_TOKEN_STEP,
     petVariant: config.petVariant ?? DEFAULT_PET_VARIANT,
-    serverUrl: typeof config.serverUrl === 'string' ? config.serverUrl.trim() : '',
-    authToken: typeof config.authToken === 'string' ? config.authToken.trim() : '',
+    serverUrl: typeof config.serverUrl === 'string'
+      ? config.serverUrl.trim()
+      : DEFAULT_GAME_SERVER_URL,
+    authToken: typeof config.authToken === 'string'
+      ? config.authToken.trim()
+      : DEFAULT_GAME_SERVER_AUTH_TOKEN,
     enabled: config.enabled ?? true,
   }
   let current: () => GamesSection = () => base

@@ -8,8 +8,7 @@
  * ```json
  * {
  *   "authToken": "…",                 // required on the deployed server:
- *                                     // every room/pet request must carry
- *                                     // ?token=… — strangers get 401
+ *                                     // JSON/mutation APIs use Bearer auth
  *   "crown": {
  *     "tokenStep": 1000000,           // tokens per bronze crown (1M)
  *     "base": 3,                      // 3 crowns of a level = 1 of the next
@@ -20,6 +19,13 @@
  *   "pet": {
  *     "maxBytes": 2097152,            // upload size cap (2MB)
  *     "maxDimension": 1024            // longest edge cap (px)
+ *   },
+ *   "antiCheat": {
+ *     "burstTokens": 500000,
+ *     "tokensPerMinute": 1000000,
+ *     "strikeLimit": 3,
+ *     "strikeWindowMs": 600000,
+ *     "lockMs": 60000
  *   }
  * }
  * ```
@@ -34,6 +40,10 @@ import {
   DEFAULT_CROWN_TOKEN_STEP,
 } from './crowns.ts'
 import { PET_MAX_BYTES, PET_MAX_DIMENSION } from './persist.ts'
+import {
+  normalizeAntiCheatPolicy,
+  type AntiCheatPolicy,
+} from './anticheat.ts'
 
 /** Crown rules served to clients. */
 export interface CrownRules {
@@ -61,8 +71,10 @@ export interface GameRules {
 
 /** The server's own configuration (rules + auth). */
 export interface GameServerConfig extends GameRules {
-  /** Shared secret: when set, every request must carry ?token=<authToken>. */
+  /** Shared secret: when set, protected APIs require Bearer authentication. */
   authToken?: string
+  /** Server-only report validation thresholds. */
+  antiCheat: AntiCheatPolicy
 }
 
 /** The default rule set (also used by the host's in-process mount). */
@@ -111,9 +123,13 @@ export function loadGameServerConfig(dataDir: string): GameServerConfig {
         maxBytes: positiveInt(pet.maxBytes, rules.pet.maxBytes),
         maxDimension: positiveInt(pet.maxDimension, rules.pet.maxDimension),
       },
+      antiCheat: normalizeAntiCheatPolicy(parsed.antiCheat),
     }
   } catch {
-    return rules as GameServerConfig
+    return {
+      ...rules,
+      antiCheat: normalizeAntiCheatPolicy(undefined),
+    }
   }
 }
 

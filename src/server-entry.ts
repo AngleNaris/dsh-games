@@ -6,6 +6,7 @@
  *
  *   $GAME_DATA/config.json  rules + auth token (see gameconfig.ts)
  *   $GAME_DATA/pets/        uploaded pet images
+ *   $GAME_DATA/anticheat.json  token baselines + anomaly counters
  *
  *   GAME_HOST   bind host (default 0.0.0.0)
  *   GAME_PORT   listen port (default 3080)
@@ -23,13 +24,19 @@ import { handleGameServer } from './gameserver.ts'
 import { loadGameServerConfig } from './gameconfig.ts'
 import { PetStore } from './pets.ts'
 import { RoomStore } from './rooms.ts'
+import { AntiCheatGuard } from './anticheat.ts'
 
 const host = process.env.GAME_HOST ?? '0.0.0.0'
 const port = Number.parseInt(process.env.GAME_PORT ?? '3080', 10)
 const dataDir = process.env.GAME_DATA ?? join(homedir(), '.dsh-games')
 
 const config = loadGameServerConfig(dataDir)
-const rooms = new RoomStore()
+const antiCheat = new AntiCheatGuard({
+  rules: config.crown,
+  policy: config.antiCheat,
+  stateFile: join(dataDir, 'anticheat.json'),
+})
+const rooms = new RoomStore({ antiCheat })
 const pets = new PetStore(join(dataDir, 'pets'))
 
 const server = createServer((req, res) => {
@@ -56,11 +63,25 @@ const server = createServer((req, res) => {
 const sweepTimer = setInterval(() => rooms.sweep(), 10_000)
 sweepTimer.unref?.()
 
+let stopping = false
+function shutdown(signal: string): void {
+  if (stopping) return
+  stopping = true
+  clearInterval(sweepTimer)
+  rooms.close()
+  server.close(() => process.exit(0))
+  setTimeout(() => process.exit(1), 5_000).unref()
+  console.log(`[dsh-games-server] stopping on ${signal}`)
+}
+process.once('SIGINT', () => shutdown('SIGINT'))
+process.once('SIGTERM', () => shutdown('SIGTERM'))
+
 server.listen(port, host, () => {
   console.log(`[dsh-games-server] listening on http://${host}:${port} (data: ${dataDir})`)
   console.log(`[dsh-games-server] crown: ${config.crown.tokenStep} tokens/crown, base ${config.crown.base}, ${config.crown.levels.length} levels`)
   console.log(`[dsh-games-server] pet: max ${config.pet.maxBytes} bytes, ${config.pet.maxDimension}px`)
+  console.log(`[dsh-games-server] anti-cheat: ${config.antiCheat.burstTokens} burst, ${config.antiCheat.tokensPerMinute}/min, ${config.antiCheat.strikeLimit} strikes`)
   console.log(config.authToken !== undefined
-    ? '[dsh-games-server] auth: ENABLED — requests must carry ?token=…'
+    ? '[dsh-games-server] auth: ENABLED — protected requests require Authorization: Bearer'
     : '[dsh-games-server] auth: DISABLED — set authToken in config.json to lock the server')
 })

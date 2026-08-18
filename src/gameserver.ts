@@ -10,9 +10,10 @@
  *
  * Security posture:
  *  - when the server config carries an `authToken`, EVERY request (rooms,
- *    pets, rules) must pass it as `?token=<authToken>` — CORS preflights
- *    excepted — so unknown clients get 401 and cannot list rooms, upload
- *    pets, or scrape other members' pet images;
+ *    pets, rules) must pass it as `Authorization: Bearer <authToken>` —
+ *    CORS preflights and the public health endpoint excepted. Authenticated
+ *    pet image GETs also accept the query token because native img elements
+ *    cannot attach headers;
  *  - pet uploads are validated server-side (magic bytes + decoded pixel
  *    dimensions), capped by the configured byte/dimension limits, and the
  *    request body is rejected early via Content-Length when it is obviously
@@ -24,7 +25,12 @@
  */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { RoomStore, MemberReport } from './rooms.ts'
+import {
+  normalizeMemberId,
+  normalizeNickname,
+  type RoomStore,
+  type MemberReport,
+} from './rooms.ts'
 import type { PetStore } from './pets.ts'
 import type { GameRules } from './gameconfig.ts'
 
@@ -32,12 +38,13 @@ import type { GameRules } from './gameconfig.ts'
 export const ROOM_API_PREFIX = '/api/games/rooms'
 export const PET_API_PREFIX = '/api/games/pets'
 export const RULES_API_PATH = '/api/games/rules'
+export const HEALTH_API_PATH = '/api/games/health'
 
 /** CORS headers applied to every shared-surface response (open relay). */
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type',
+  'access-control-allow-headers': 'authorization, content-type, x-dsh-member-token',
 } as const
 
 /** The stores and policy the shared surface needs. */
@@ -75,6 +82,35 @@ function tokenMatches(expected: string, given: string): boolean {
   return diff === 0
 }
 
+/** Read the opaque member-session bearer from its dedicated request header. */
+function memberTokenOf(req: IncomingMessage): string {
+  const value = req.headers['x-dsh-member-token']
+  return typeof value === 'string' ? value : ''
+}
+
+/** Convert RoomStore result errors into stable HTTP status codes. */
+function roomErrorStatus(error: string): number {
+  switch (error) {
+    case 'invalid':
+      return 400
+    case 'token-regression':
+      return 409
+    case 'crowns-mismatch':
+    case 'token-jump':
+      return 422
+    case 'anti-cheat-locked':
+    case 'cooldown':
+      return 429
+    case 'unauthorized':
+      return 401
+    case 'member-conflict':
+    case 'room-full':
+      return 409
+    default:
+      return 404
+  }
+}
+
 /**
  * Enforce the auth token. Returns true when the request may proceed; false
  * when a 401 (or preflight pass) was already written.
@@ -86,7 +122,14 @@ function requireAuth(req: IncomingMessage, res: ServerResponse, ctx: GamesServer
   }
   if (ctx.authToken === undefined || ctx.authToken === '') return true
   const url = new URL(req.url ?? '/', 'http://localhost')
-  const given = url.searchParams.get('token') ?? ''
+  const authorization = req.headers.authorization
+  const bearer = typeof authorization === 'string' && authorization.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length).trim()
+    : ''
+  const petImageToken = req.method === 'GET' && url.pathname.startsWith(`${PET_API_PREFIX}/`)
+    ? url.searchParams.get('token') ?? ''
+    : ''
+  const given = bearer !== '' ? bearer : petImageToken
   if (tokenMatches(ctx.authToken, given)) return true
   json(res, 401, { ok: false, error: 'unauthorized' })
   return false
@@ -147,9 +190,17 @@ export function handleGameServer(
   res: ServerResponse,
   ctx: GamesServerContext,
 ): void | Promise<void> {
-  if (!requireAuth(req, res, ctx)) return
   const url = new URL(req.url ?? '/', 'http://localhost')
   const pathname = url.pathname
+  if (req.method === 'OPTIONS') {
+    preflight(res)
+    return
+  }
+  if (pathname === HEALTH_API_PATH && req.method === 'GET') {
+    json(res, 200, { ok: true, protocolVersion: 3 })
+    return
+  }
+  if (!requireAuth(req, res, ctx)) return
 
   if (pathname === RULES_API_PATH && req.method === 'GET') {
     json(res, 200, { ok: true, rules: ctx.rules })
@@ -166,7 +217,7 @@ export function handleGameServer(
   return
 }
 
-/** Rooms subtree: list/create, <code>/state, <code>/members (+ DELETE). */
+/** Rooms subtree: list/create, <code>/join/state/members/messages. */
 function routeRoom(
   req: IncomingMessage,
   res: ServerResponse,
@@ -213,49 +264,94 @@ function routeRoom(
     return
   }
 
+  if (action === 'join' && req.method === 'POST') {
+    return readJsonBody(req).then((body) => {
+      const report = memberReportOf(body)
+      const result = ctx.rooms.joinMember(code, report)
+      if (!result.ok) {
+        json(res, roomErrorStatus(result.error), { ok: false, error: result.error })
+        return
+      }
+      json(res, 200, {
+        ok: true,
+        room: result.room,
+        memberToken: result.memberToken,
+      })
+    }, (error) => {
+      json(res, 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
+    })
+  }
+
   if (action === 'members' && req.method === 'POST') {
     return readJsonBody(req).then((body) => {
+      const result = ctx.rooms.heartbeatMember(code, memberReportOf(body), memberTokenOf(req))
+      if (!result.ok) {
+        json(res, roomErrorStatus(result.error), { ok: false, error: result.error })
+        return
+      }
+      json(res, 200, { ok: true, room: result.room })
+    }, (error) => {
+      json(res, 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
+    })
+  }
+
+  if (action === 'messages' && req.method === 'POST') {
+    return readJsonBody(req).then((body) => {
       const record = (typeof body === 'object' && body !== null) ? body as Record<string, unknown> : {}
-      const member = (typeof record.member === 'object' && record.member !== null)
-        ? record.member as Record<string, unknown>
+      const message = (typeof record.message === 'object' && record.message !== null)
+        ? record.message as Record<string, unknown>
         : {}
-      const report: MemberReport = {
-        memberId: typeof member.memberId === 'string' ? member.memberId : '',
-        nickname: typeof member.nickname === 'string' ? member.nickname : '',
-        tokens: typeof member.tokens === 'number' ? member.tokens : 0,
-        crowns: Array.isArray(member.crowns) ? member.crowns as number[] : undefined,
-        hats: typeof member.hats === 'number' ? member.hats : undefined,
-        phase: typeof member.phase === 'string' ? member.phase : 'idle',
-        petUrl: typeof member.petUrl === 'string' ? member.petUrl : undefined,
-        petVersion: typeof member.petVersion === 'number' ? member.petVersion : undefined,
-      }
-      if (report.memberId === '' || report.memberId.length > 64) {
-        json(res, 400, { ok: false, error: 'invalid-member' })
+      const result = ctx.rooms.addMessage(code, {
+        memberId: typeof message.memberId === 'string' ? message.memberId : '',
+        text: typeof message.text === 'string' ? message.text : '',
+      }, memberTokenOf(req))
+      if (!result.ok) {
+        json(res, roomErrorStatus(result.error), { ok: false, error: result.error })
         return
       }
-      const room = ctx.rooms.upsertMember(code, report)
-      if (room === undefined) {
-        json(res, 404, { ok: false, error: 'room-not-found' })
-        return
-      }
-      json(res, 200, { ok: true, room })
+      json(res, 200, { ok: true, room: result.room })
     }, (error) => {
       json(res, 400, { ok: false, error: error instanceof Error ? error.message : String(error) })
     })
   }
 
   if (action === 'members' && memberId !== undefined && req.method === 'DELETE') {
-    if (memberId.length === 0 || memberId.length > 64) {
+    if (normalizeMemberId(memberId) === undefined) {
       json(res, 400, { ok: false, error: 'invalid-member' })
       return
     }
-    const removed = ctx.rooms.removeMember(code, memberId)
-    json(res, 200, { ok: true, removed })
+    const result = ctx.rooms.removeMember(code, memberId, memberTokenOf(req))
+    if (!result.ok) {
+      json(res, roomErrorStatus(result.error), { ok: false, error: result.error })
+      return
+    }
+    json(res, 200, { ok: true, removed: result.removed })
     return
   }
 
   json(res, 404, { ok: false, error: 'route-not-found' })
   return
+}
+
+/** Parse the shared member report envelope used by join and heartbeat. */
+function memberReportOf(body: unknown): MemberReport {
+  const record = (typeof body === 'object' && body !== null) ? body as Record<string, unknown> : {}
+  const member = (typeof record.member === 'object' && record.member !== null)
+    ? record.member as Record<string, unknown>
+    : {}
+  return {
+    memberId: typeof member.memberId === 'string' ? member.memberId : '',
+    nickname: typeof member.nickname === 'string' ? member.nickname : '',
+    tokens: typeof member.tokens === 'number' ? member.tokens : 0,
+    crowns: Array.isArray(member.crowns) ? member.crowns as number[] : undefined,
+    hats: typeof member.hats === 'number' ? member.hats : undefined,
+    phase: typeof member.phase === 'string' ? member.phase : 'idle',
+    active: member.active === true,
+    petUrl: typeof member.petUrl === 'string' ? member.petUrl : undefined,
+    petVersion: typeof member.petVersion === 'number' ? member.petVersion : undefined,
+    petVariant: typeof member.petVariant === 'string' ? member.petVariant : undefined,
+    size: typeof member.size === 'number' ? member.size : undefined,
+  }
 }
 
 /** Pets subtree: GET serve image, POST upload (raw bytes), DELETE remove. */

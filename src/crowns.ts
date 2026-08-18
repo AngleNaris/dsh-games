@@ -1,8 +1,8 @@
 /**
  * Crown system — the pet's progress display. One bronze crown is earned per
  * `tokenStep` usage tokens (1M by default, configured on the game server);
- * `base` crowns of one level auto-craft into 1 crown of the next level,
- * through ten levels:
+ * `base` crowns of one level (3 by default) auto-craft into 1 crown of the
+ * next level, through ten levels:
  *
  *   bronze → silver → gold → platinum → amethyst,
  *   then the magic tier repeats the same metals (magic crowns render with a
@@ -24,7 +24,10 @@
  *
  * The inventory is not stored: it is a pure base-`base` decomposition of the
  * lifetime crown units (tokens / tokenStep), so "auto-craft" happens by
- * deriving the counts. Shared by the host service and the browser half.
+ * deriving the counts. The client places the derived crowns on the pet in a
+ * bottom-up pile (a display layer must be full before the one above starts)
+ * — placement is a rendering concern, the ladder itself is unchanged.
+ * Shared by the host service and the browser half.
  * @module @linxin666/dsh-games/crowns
  */
 
