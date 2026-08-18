@@ -2,3 +2,6 @@ node_modules/
 lib/
 *.tsbuildinfo
 tools/artifacts/
+.playwright-mcp/
+release/
+ren-u4ZdUm/

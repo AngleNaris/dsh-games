@@ -120,6 +120,24 @@ compose 与 package 元数据 → 不使用 `--delete` 地同步到服务器 →
 
 ## 安装
 
+### 使用 GitHub Release 安装包（推荐）
+
+从 GitHub Release 下载 `linxin666-dsh-games-<版本>.tgz`，复制到目标电脑后执行：
+
+```powershell
+dsh plugin --profile web add "D:\Downloads\linxin666-dsh-games-0.1.0.tgz"
+dsh web
+```
+
+发布包已经包含构建好的 host/client 代码，目标电脑无需复制 `node_modules`，也无需重新构建。
+升级时安装新版本的 `.tgz` 并重启 `dsh web`；卸载命令：
+
+```powershell
+dsh plugin --profile web remove @linxin666/dsh-games
+```
+
+### 从源码安装
+
 ```sh
 # 1. 构建（需要 node >= 22.19）
 cd <本仓库>
