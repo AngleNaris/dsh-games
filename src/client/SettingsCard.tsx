@@ -10,7 +10,7 @@
  * the official dsh-host-apiproxy allowlists third-party namespaces out, so
  * the card talks to `/api/games/*` directly (the host mirrors values into the
  * settings document itself).
- * @module @anglenaris/dsh-games/client/SettingsCard
+ * @module @kasidia/dsh-games/client/SettingsCard
  */
 
 import { useEffect, useState, type ReactElement } from 'react'

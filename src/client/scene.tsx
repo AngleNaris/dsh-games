@@ -10,7 +10,7 @@
  * - `column` — vertical line centered on the anchor pet.
  * - `grid`   — automatic rows × columns layout beside the anchor pet.
  * - `orbit`  — ring around the anchor pet.
- * @module @anglenaris/dsh-games/client/scene
+ * @module @kasidia/dsh-games/client/scene
  */
 
 import {

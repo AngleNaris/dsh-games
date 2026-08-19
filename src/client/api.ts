@@ -8,7 +8,7 @@
  * When the plugin is configured with an `authToken`, protected game-server
  * requests carry it as a Bearer token. Plain img tags cannot attach headers,
  * so authenticated pet image GETs retain a query-token compatibility path.
- * @module @anglenaris/dsh-games/client/api
+ * @module @kasidia/dsh-games/client/api
  */
 
 import type { MemberPhase } from '../rooms.ts'

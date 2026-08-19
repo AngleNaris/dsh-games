@@ -4,7 +4,7 @@
  * The standalone server may override these values from its data-volume
  * config. Clients fetch that live rule set from `/api/games/rules`; when the
  * server is unavailable they fall back to this exact default snapshot.
- * @module @anglenaris/dsh-games/rules
+ * @module @kasidia/dsh-games/rules
  */
 
 import {

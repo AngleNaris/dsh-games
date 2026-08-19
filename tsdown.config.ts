@@ -25,7 +25,7 @@ const PLATFORM_MODULES = [
   '@deepseek-ai/dsh-client-schema-form',
 ] as const
 
-const PACKAGE_ID = '@anglenaris/dsh-games'
+const PACKAGE_ID = '@kasidia/dsh-games'
 
 const nodeHalf: UserConfig = {
   name: PACKAGE_ID,

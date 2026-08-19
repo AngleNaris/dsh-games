@@ -5,7 +5,7 @@
  * joined), the draggable pet with its crown pyramid, the token-usage effects
  * (label shimmer while consuming, burst + crown bubbles on gains), and the
  * nickname / room / pet-customization popover.
- * @module @anglenaris/dsh-games/client/GamesApp
+ * @module @kasidia/dsh-games/client/GamesApp
  */
 
 import {

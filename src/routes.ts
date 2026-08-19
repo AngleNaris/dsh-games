@@ -6,7 +6,7 @@
  * `/api/games/rooms*` and `/api/games/pets*` so local prototype play works
  * without a separate deployment. The standalone `lib/server.js` serves that
  * same surface in Docker.
- * @module @anglenaris/dsh-games/routes
+ * @module @kasidia/dsh-games/routes
  */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'

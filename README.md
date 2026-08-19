@@ -122,19 +122,34 @@ compose 与 package 元数据 → 不使用 `--delete` 地同步到服务器 →
 
 ## 安装
 
+### 直接从 GitHub 仓库安装
+
+仓库已经提交构建好的 `lib/index.js`、`lib/client.js`、`lib/server.js` 和类型声明，
+因此插件安装器可以直接使用 GitHub 仓库，无需在目标电脑上执行构建：
+
+```powershell
+dsh plugin --profile web add "github:AngleNaris/dsh-games"
+```
+
+在插件安装界面中也可以直接填写仓库地址：
+
+```text
+https://github.com/AngleNaris/dsh-games
+```
+
 ### 使用 GitHub Release 安装包（推荐）
 
 在 PowerShell 中执行这一条固定命令，即可从 GitHub 获取并安装最新版本：
 
 ```powershell
-dsh plugin --profile web add "https://github.com/AngleNaris/dsh-games/releases/latest/download/anglenaris-dsh-games.tgz"
+dsh plugin --profile web add "https://github.com/AngleNaris/dsh-games/releases/latest/download/kasidia-dsh-games.tgz"
 ```
 
 发布包已经包含构建好的 host/client 代码，目标电脑无需复制 `node_modules`，也无需重新构建。
 升级时再次执行同一条命令，然后重启 `dsh web`。卸载命令：
 
 ```powershell
-dsh plugin --profile web remove @anglenaris/dsh-games
+dsh plugin --profile web remove @kasidia/dsh-games
 ```
 
 ### 从源码安装

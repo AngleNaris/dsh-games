@@ -7,7 +7,7 @@
  * The first valid observation establishes a historical baseline.
  *
  * Persisted state contains only member ids, counters, and timestamps.
- * @module @anglenaris/dsh-games/anticheat
+ * @module @kasidia/dsh-games/anticheat
  */
 
 import {

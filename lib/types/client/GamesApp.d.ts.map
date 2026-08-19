@@ -1,0 +1,1 @@
+{"version":3,"file":"GamesApp.d.ts","sourceRoot":"","sources":["../../../src/client/GamesApp.tsx"],"names":[],"mappings":"AAAA;;;;;;;;GAQG;AAEH,OAAO,EAML,KAAK,YAAY,EAClB,MAAM,OAAO,CAAA;AAcd,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,kCAAkC,CAAA;AA2HjE,UAAU,aAAa;IACrB,CAAC,EAAE,SAAS,CAAA;CACb;AAmCD,wBAAgB,QAAQ,CAAC,KAAK,EAAE,aAAa,GAAG,YAAY,CAg0C3D"}

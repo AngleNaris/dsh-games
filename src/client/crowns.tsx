@@ -17,7 +17,7 @@
  *     crown, so its node slides from the old cluster to its new slot while
  *     the rest of the pile re-collapses around it (CSS transitions); a
  *     flash bursts at the merge point and the consumed crowns shrink away.
- * @module @anglenaris/dsh-games/client/crowns
+ * @module @kasidia/dsh-games/client/crowns
  */
 
 import {

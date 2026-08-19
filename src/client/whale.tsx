@@ -3,7 +3,7 @@
  * the favicon.svg path shipped in @deepseek-ai/dsh-web-frontend, copied
  * verbatim for the demo pet), plus the token party hats. All inline SVG, no
  * external assets.
- * @module @anglenaris/dsh-games/client/whale
+ * @module @kasidia/dsh-games/client/whale
  */
 
 import { memo, type CSSProperties, type ReactElement } from 'react'

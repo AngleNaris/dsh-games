@@ -29,7 +29,7 @@
  *   }
  * }
  * ```
- * @module @anglenaris/dsh-games/gameconfig
+ * @module @kasidia/dsh-games/gameconfig
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
