@@ -50,8 +50,8 @@ const ROW_SCALE: readonly number[] = [1.12, 1.10, 1.08, 1.06, 1.04, 1.02, 1.00]
 /** Vertical gap between layers' crown-bottom lines, × crownSize. */
 const ROW_GAP = 0.34
 
-/** How far the bottom layer's crown bottoms float above the pet head, × size. */
-const BOTTOM_CLEARANCE = 0.16
+/** Small border-to-border gap between the bottom crowns and the pet box, × size. */
+const BOTTOM_CLEARANCE = 0.04
 
 /** Horizontal gap between crowns in a layer, × that layer's crown size —
  * ~0.55 keeps the crowns near-touching (their artwork is ~0.55..0.61 of the

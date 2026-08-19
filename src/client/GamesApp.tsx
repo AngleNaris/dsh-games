@@ -47,9 +47,12 @@ import {
 } from './progress.ts'
 import {
   arrangeScene,
+  canArrangeScene,
+  clampPetPos,
   MemberPetScene,
+  resolveSceneMove,
   SceneControls,
-  snapPos,
+  sortRoomMembers,
   useScenePrefs,
   type SceneAnchor,
   type SceneMember,
@@ -201,8 +204,12 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   const [crownFx, setCrownFx] = useState<{ tier: number; key: number } | null>(null)
   const [tokenStreamActive, setTokenStreamActive] = useState(false)
   const [petNote, setPetNote] = useState<string | null>(null)
+  const [sceneNote, setSceneNote] = useState<string | null>(null)
   const [petBusy, setPetBusy] = useState(false)
   const [viewport, setViewport] = useState({ width: 0, height: 0 })
+  const drag = useRef<{ startX: number; startY: number; right: number; bottom: number } | null>(null)
+  const movedRef = useRef(false)
+  const [dragging, setDragging] = useState(false)
   const popoverRef = useRef<HTMLDivElement | null>(null)
   const petRef = useRef<HTMLDivElement | null>(null)
   // ---- room chat ----
@@ -324,28 +331,61 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   // ---- room pet scene (arrangement + free-drag memory) ----
   const scene = useScenePrefs()
   const roomMembers = room === null ? [] : room.members
-  const otherMembers = roomMembers.filter((member) => member.memberId !== stateRef.current?.memberId)
+  const sortedRoomMembers = sortRoomMembers(roomMembers, scene.prefs.sort)
+  const otherMembers = sortedRoomMembers.filter((member) => member.memberId !== stateRef.current?.memberId)
+  const sceneViewport = { width: viewportWidth, height: viewportHeight }
+  const displayPos = state === null
+    ? { right: 0, bottom: 0 }
+    : clampPetPos(state.display, state.display.size, sceneViewport)
+  const sceneMembers: SceneMember[] = state === null
+    ? []
+    : sortedRoomMembers.map((member) => ({
+        id: member.memberId,
+        size: state.display.size,
+      }))
+  const sceneAnchor: SceneAnchor | null = state === null
+    ? null
+    : {
+        id: state.memberId,
+        size: state.display.size,
+        right: displayPos.right,
+        bottom: displayPos.bottom,
+      }
   const scenePositions = (() => {
-    if (state === null || room === null) return {}
-    const members: SceneMember[] = room.members.map((member) => ({
-      id: member.memberId,
-      size: state.display.size,
-    }))
-    const anchor: SceneAnchor = {
-      id: state.memberId,
-      size: state.display.size,
-      right: state.display.right,
-      bottom: state.display.bottom,
-    }
+    if (sceneAnchor === null || room === null) return {}
     return arrangeScene(
       scene.prefs.mode,
-      members,
-      anchor,
+      sceneMembers,
+      sceneAnchor,
       scene.prefs.spacing,
       scene.prefs.free,
-      { width: viewportWidth, height: viewportHeight },
+      sceneViewport,
+      scene.prefs.gridColumns,
+      scene.prefs.gridRows,
     )
   })()
+
+  useEffect(() => {
+    const current = stateRef.current
+    if (current === null || drag.current !== null) return
+    const clamped = clampPetPos(current.display, current.display.size, {
+      width: viewportWidth,
+      height: viewportHeight,
+    })
+    if (clamped.right === current.display.right && clamped.bottom === current.display.bottom) return
+    setState((prev) => prev === null
+      ? prev
+      : { ...prev, display: { ...prev.display, ...clamped } })
+    void gamesApi.setDisplay(clamped).catch(() => {
+      // The clamped local position remains usable; the next resize/poll retries.
+    })
+  }, [
+    state?.display.bottom,
+    state?.display.right,
+    state?.display.size,
+    viewportHeight,
+    viewportWidth,
+  ])
 
   // ---- own-state polling (visible tab only) ----
   useEffect(() => {
@@ -661,14 +701,21 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     const onVisibility = (): void => {
       if (document.visibilityState === 'visible') void tick()
     }
+    const onResume = (): void => { void tick() }
     timer = window.setInterval(tick, ROOM_POLL_MS)
     document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('focus', onResume)
+    window.addEventListener('online', onResume)
+    window.addEventListener('pageshow', onResume)
     void tick()
     return () => {
       disposed = true
       controller?.abort()
       if (timer !== undefined) window.clearInterval(timer)
       document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('focus', onResume)
+      window.removeEventListener('online', onResume)
+      window.removeEventListener('pageshow', onResume)
     }
     // State and rules are read through refs so report changes do not spawn
     // overlapping intervals; only the authenticated room identity re-arms.
@@ -996,9 +1043,6 @@ export function GamesApp(props: GamesAppProps): ReactElement {
   }, [t])
 
   // ---- drag (disabled while the position is locked) ----
-  const drag = useRef<{ startX: number; startY: number; right: number; bottom: number } | null>(null)
-  const movedRef = useRef(false)
-  const [dragging, setDragging] = useState(false)
   const onPointerDown = useCallback((event: React.PointerEvent): void => {
     const current = stateRef.current
     if (current === null || current.display.locked) return
@@ -1020,10 +1064,29 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     const dx = event.clientX - start.startX
     const dy = event.clientY - start.startY
     if (Math.abs(dx) + Math.abs(dy) > 5) movedRef.current = true
-    const right = Math.max(0, start.right - dx)
-    const bottom = Math.max(0, start.bottom - dy)
-    setState({ ...current, display: { ...current.display, right, bottom } })
-  }, [])
+    const desired = clampPetPos({
+      right: start.right - dx,
+      bottom: start.bottom - dy,
+    }, current.display.size, sceneViewport)
+    const next = roomRef.current !== null && scene.prefs.mode === 'free'
+      ? resolveSceneMove(
+          current.memberId,
+          current.display.size,
+          desired,
+          sceneMembers,
+          scenePositions,
+          sceneViewport,
+          scene.prefs.spacing,
+        )
+      : desired
+    setState({ ...current, display: { ...current.display, ...next } })
+  }, [
+    scene.prefs.mode,
+    scene.prefs.spacing,
+    sceneMembers,
+    scenePositions,
+    sceneViewport,
+  ])
   const finishDrag = useCallback((): void => {
     const start = drag.current
     drag.current = null
@@ -1052,7 +1115,14 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     return <span data-dsh-games data-testid="games-disabled" />
   }
 
-  const display = state.display
+  const display = { ...state.display, ...displayPos }
+  const chatComposerWidth = Math.min(286, Math.max(0, viewportWidth - 16))
+  const petCenterX = viewportWidth - display.right - display.size / 2
+  const chatComposerCenterX = Math.min(
+    viewportWidth - 8 - chatComposerWidth / 2,
+    Math.max(8 + chatComposerWidth / 2, petCenterX),
+  )
+  const chatComposerShiftX = chatComposerCenterX - petCenterX
   const popoverWidth = Math.min(380, Math.max(0, viewportWidth - 24))
   const petRightEdge = viewportWidth - display.right
   const desiredPopoverRightEdge = Math.min(
@@ -1078,10 +1148,10 @@ export function GamesApp(props: GamesAppProps): ReactElement {
     popoverStyle.bottom = 'auto'
     popoverStyle.maxHeight = belowSpace
   }
-  // The bottom bar shows nickname + tokens only; growth settles on the next
-  // host-state poll and shows a short "+N" chip.
-  const label = `${state.nickname} · ${formatTokens(displayTokens ?? state.tokens)} tokens`
+  // The compact two-line bar keeps the player name readable above tokens.
+  const tokenLabel = `${formatTokens(displayTokens ?? state.tokens)} tokens`
   const consuming = isPetActive(state.phase, tokenStreamActive)
+  const labelMaxWidth = Math.max(24, Math.floor(display.size + scene.prefs.spacing - 4))
   const customVariant = isCustomVariant(state.petVariant) ? petVariantOf(state.petVariant) : null
   const petUrl = state.pet !== undefined
     ? petImageUrl(state.serverUrl, state.memberId, state.pet, state.authToken)
@@ -1096,8 +1166,15 @@ export function GamesApp(props: GamesAppProps): ReactElement {
       {display.visible ? (
       <span
         className="dsg-pet-root"
+        data-own="true"
+        data-chat-open={chatOpen}
         data-dragging={dragging}
-        style={{ right: display.right, bottom: display.bottom }}
+        style={{
+          right: display.right,
+          bottom: display.bottom,
+          '--dsg-label-max-width': `${labelMaxWidth}px`,
+          '--dsg-chat-composer-shift-x': `${chatComposerShiftX}px`,
+        } as CSSProperties}
       >
         {menuOpen && (
           <div
@@ -1322,7 +1399,17 @@ export function GamesApp(props: GamesAppProps): ReactElement {
                     <SceneControls
                       t={t}
                       prefs={scene.prefs}
-                      onChange={(patch) => scene.update(patch)}
+                      note={sceneNote}
+                      onChange={(patch) => {
+                        const next = { ...scene.prefs, ...patch }
+                        if (sceneAnchor !== null &&
+                          !canArrangeScene(next, sceneMembers, sceneAnchor, sceneViewport)) {
+                          setSceneNote(t('scene.collisionRejected'))
+                          return
+                        }
+                        setSceneNote(null)
+                        scene.update(patch)
+                      }}
                       onReset={scene.resetMembers}
                     />
                   </>
@@ -1401,19 +1488,22 @@ export function GamesApp(props: GamesAppProps): ReactElement {
             data-testid="games-label"
           >
             <span className="dsg-label-content">
-              {label}
-              {tokenFx !== null && (
-                <em className="dsg-token-chip" key={tokenFx.key} data-testid="games-token-chip">
-                  +{formatTokens(tokenFx.delta)}
-                </em>
-              )}
+              <span className="dsg-label-player">{state.nickname}</span>
+              <span className="dsg-label-tokens">
+                {tokenLabel}
+                {tokenFx !== null && (
+                  <em className="dsg-token-chip" key={tokenFx.key} data-testid="games-token-chip">
+                    +{formatTokens(tokenFx.delta)}
+                  </em>
+                )}
+              </span>
             </span>
           </span>
         </div>
         {otherMembers.map((member) => {
           const pos = scenePositions[member.memberId]
           if (pos === undefined) return null
-          const auto = scene.prefs.mode === 'row' || scene.prefs.mode === 'column' || scene.prefs.mode === 'orbit'
+          const draggable = scene.prefs.mode === 'free'
           const memberChat = memberChats[member.memberId]
           return (
             <MemberPetScene
@@ -1421,11 +1511,20 @@ export function GamesApp(props: GamesAppProps): ReactElement {
               member={member}
               size={display.size}
               pos={pos}
-              draggable={!auto}
+              labelMaxWidth={labelMaxWidth}
+              draggable={draggable}
               showLabel={scene.prefs.showLabels}
               chat={memberChat ?? null}
               onMove={(next) => {
-                scene.moveMember(member.memberId, scene.prefs.mode === 'grid' ? snapPos(next, scene.prefs.spacing) : next)
+                scene.moveMember(member.memberId, resolveSceneMove(
+                  member.memberId,
+                  display.size,
+                  next,
+                  sceneMembers,
+                  scenePositions,
+                  sceneViewport,
+                  scene.prefs.spacing,
+                ))
               }}
             />
           )

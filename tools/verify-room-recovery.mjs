@@ -12,7 +12,8 @@ const { chromium } = require('C:/_MY_WORK/dsh-skin/dsh-web-ui/node_modules/playw
 const A = process.env.DSG_VERIFY_A ?? 'http://127.0.0.1:3093'
 const B = process.env.DSG_VERIFY_B ?? 'http://127.0.0.1:3094'
 const SERVER = process.env.DSG_VERIFY_SERVER ?? 'http://127.0.0.1:3092'
-const MEMBER_TTL_WAIT_MS = Number(process.env.DSG_MEMBER_TTL_WAIT_MS ?? 32_000)
+// Default server TTL is two minutes; allow one sweep interval plus margin.
+const MEMBER_TTL_WAIT_MS = Number(process.env.DSG_MEMBER_TTL_WAIT_MS ?? 132_000)
 
 const post = (url, body) => fetch(url, {
   method: 'POST',
@@ -20,7 +21,17 @@ const post = (url, body) => fetch(url, {
   body: JSON.stringify(body),
 })
 
+const originals = new Map()
 for (const base of [A, B]) {
+  const state = await fetch(`${base}/api/games/state`).then((response) => response.json())
+  originals.set(base, {
+    config: {
+      serverUrl: state.serverUrl,
+      authToken: state.authToken,
+      petVariant: state.petVariant,
+    },
+    display: state.display,
+  })
   const response = await post(`${base}/api/games/config`, { serverUrl: SERVER, authToken: '' })
   if (!response.ok) throw new Error(`failed to configure ${base}: HTTP ${response.status}`)
   await post(`${base}/api/games/display`, { visible: true, size: 100, right: 24, bottom: 20 })
@@ -34,9 +45,16 @@ try {
   const pageB = await context.newPage()
   let recoveryWindow = false
   let expectedNetworkErrors = 0
+  let expectedOptionalPetErrors = 0
   for (const [name, page] of [['A', pageA], ['B', pageB]]) {
     page.on('console', (message) => {
       if (message.type() !== 'error') return
+      if (name === 'A' &&
+          message.location().url.endsWith('/api/pet/pets') &&
+          message.text().startsWith('Failed to load resource:')) {
+        expectedOptionalPetErrors += 1
+        return
+      }
       if (name === 'B' && recoveryWindow && message.text().startsWith('Failed to load resource:')) {
         expectedNetworkErrors += 1
         return
@@ -195,7 +213,11 @@ try {
   console.log(`[room-recovery] room ${code}: remote motion and label FX active -> sleeping passed`)
   console.log('[room-recovery] pet shadow is present while crowns remain shadow-free')
   console.log('[room-recovery] expired member token was replaced and the client rejoined automatically')
-  console.log(`[room-recovery] two members present after recovery; expected injected network errors: ${expectedNetworkErrors}; unexpected console errors: 0`)
+  console.log(`[room-recovery] two members present after recovery; expected injected network errors: ${expectedNetworkErrors}; optional pet-plugin 404s: ${expectedOptionalPetErrors}; unexpected console errors: 0`)
 } finally {
   await browser.close()
+  for (const [base, original] of originals) {
+    await post(`${base}/api/games/config`, original.config).catch(() => {})
+    await post(`${base}/api/games/display`, original.display).catch(() => {})
+  }
 }

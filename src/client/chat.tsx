@@ -99,12 +99,11 @@ export function ChatComposer(props: {
   )
 }
 
-/** A floating message bubble (nickname prefix for other players' messages). */
-export function ChatBubble(props: { text: string; from?: string; leaving?: boolean }): ReactElement {
-  const { text, from, leaving } = props
+/** A floating message bubble. Player identity stays in the pet label. */
+export function ChatBubble(props: { text: string; leaving?: boolean }): ReactElement {
+  const { text, leaving } = props
   return (
     <span className={`dsg-chat-bubble${leaving === true ? ' dsg-chat-leaving' : ''}`} aria-live="polite">
-      {from !== undefined && <strong className="dsg-chat-from">{from}：</strong>}
       {text}
     </span>
   )

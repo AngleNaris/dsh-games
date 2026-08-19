@@ -2,7 +2,7 @@
  * Room pet scene demo: two dsh web instances (3080 = player A, 3081 = player B)
  * join one room on A's local host; A's page must show B's pet floating around
  * A's anchor pet, and the arrangement controls must reflow it (free / row /
- * column / orbit / grid snap + drag). Also verifies the room protocol carries
+ * column / orbit / configurable grid). Also verifies the room protocol carries
  * the member's pet variant. Screenshots land in tools/artifacts/.
  *
  * The instances normally point at a remote game server with auth; the script
@@ -23,8 +23,8 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const ARTIFACTS = join(ROOT, 'tools', 'artifacts')
 mkdirSync(ARTIFACTS, { recursive: true })
 
-const A = 'http://127.0.0.1:3080'
-const B = 'http://127.0.0.1:3081'
+const A = process.env.DSG_VERIFY_A ?? 'http://127.0.0.1:3080'
+const B = process.env.DSG_VERIFY_B ?? 'http://127.0.0.1:3081'
 
 const post = (url, body) => fetch(url, {
   method: 'POST',
@@ -59,7 +59,7 @@ try {
     page.on('pageerror', (err) => errors.push(`${name}: pageerror: ${err.message}`))
   }
 
-  // Both pets visible at the default 60px; B flips to the ocean pattern so the
+  // Both pets use a stable 100px test size; B flips to the ocean pattern so the
   // protocol round-trip of petVariant is observable.
   for (const base of [A, B]) {
     await post(`${base}/api/games/display`, { visible: true, size: 100, right: 24, bottom: 20 })
@@ -101,7 +101,7 @@ try {
   await dismissModals(pageB)
   await pageA.waitForSelector('[data-testid="games-pet"]', { timeout: 20_000 })
   await pageB.waitForSelector('[data-testid="games-pet"]', { timeout: 20_000 })
-  console.log('[scene] both pets visible at 60px')
+  console.log('[scene] both pets visible at 100px')
 
   // A creates a room on its local host.
   await pageA.click('[data-testid="games-pet"]')
@@ -154,6 +154,12 @@ try {
   // Open the arrangement controls and exercise every mode.
   const controls = '[data-testid="games-scene-controls"]'
   await pageA.waitForSelector(controls)
+  await pageA.locator(`${controls} .dsg-slider`).evaluate((element) => {
+    element.value = '24'
+    element.dispatchEvent(new Event('input', { bubbles: true }))
+    element.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  await pageA.waitForTimeout(300)
   const clickMode = async (label) => {
     await pageA.click(`${controls} .dsg-radio:has-text("${label}")`)
     await pageA.waitForTimeout(400)
@@ -177,34 +183,40 @@ try {
   console.log('[scene] column mode: x-centers aligned')
   await pageA.screenshot({ path: join(ARTIFACTS, '22-scene-column.png') })
 
-  // ---- orbit: member distance ≈ spacing (110) ----
+  // ---- orbit: center distance = both pet radii + configured edge gap ----
   await clickMode('环绕排列')
   const orbBox = await scenePets.first().boundingBox()
   const distance = Math.hypot(centerX(orbBox) - centerX(anchor), centerY(orbBox) - centerY(anchor))
-  if (Math.abs(distance - 110) > 6) {
-    throw new Error(`orbit mode: distance ${distance.toFixed(1)}px != 110px`)
+  const expectedDistance = anchor.width / 2 + orbBox.width / 2 + 24
+  if (Math.abs(distance - expectedDistance) > 6) {
+    throw new Error(`orbit mode: distance ${distance.toFixed(1)}px != ${expectedDistance.toFixed(1)}px`)
   }
-  console.log('[scene] orbit mode: on the 110px ring')
+  console.log(`[scene] orbit mode: on the ${expectedDistance.toFixed(1)}px ring`)
   await pageA.screenshot({ path: join(ARTIFACTS, '23-scene-orbit.png') })
 
-  // ---- grid: drag snaps to the spacing grid (default 110px) ----
-  await clickMode('网格吸附')
+  // ---- grid: rows × columns are configurable and the layout owns position ----
+  await clickMode('网格排列')
+  await pageA.fill('[data-testid="games-scene-grid-columns"]', '2')
+  await pageA.fill('[data-testid="games-scene-grid-rows"]', '2')
+  await pageA.waitForTimeout(300)
   const gridBox = await scenePets.first().boundingBox()
   await pageA.mouse.move(gridBox.x + gridBox.width / 2, gridBox.y + gridBox.height / 2)
   await pageA.mouse.down()
   await pageA.mouse.move(gridBox.x + 87, gridBox.y - 53, { steps: 8 })
   await pageA.mouse.up()
   await pageA.waitForTimeout(400)
-  const snapped = await scenePets.first().boundingBox()
-  const right = windowRight(snapped)
-  const bottom = windowBottom(snapped)
-  if (right % 110 !== 0 || bottom % 110 !== 0) {
-    throw new Error(`grid mode: drag ended at (${right},${bottom}), not on the 110px grid`)
+  const gridAfterDrag = await scenePets.first().boundingBox()
+  if (Math.abs(gridAfterDrag.x - gridBox.x) > 2 || Math.abs(gridAfterDrag.y - gridBox.y) > 2) {
+    throw new Error('grid mode allowed manual dragging')
   }
-  console.log(`[scene] grid mode: dragged to grid cell (${right},${bottom})`)
+  console.log('[scene] grid mode: 2x2 controls applied and manual dragging disabled')
   await pageA.screenshot({ path: join(ARTIFACTS, '24-scene-grid.png') })
 
   // ---- free: drag is remembered ----
+  if (await pageA.locator(controls).count() === 0) {
+    await pageA.click('[data-testid="games-pet"]')
+    await pageA.waitForSelector(controls)
+  }
   await clickMode('自由')
   const freeBox = await scenePets.first().boundingBox()
   const dragFromX = freeBox.x + freeBox.width / 2
@@ -270,12 +282,4 @@ try {
 } finally {
   await restore()
   await browser.close()
-}
-
-function windowRight(box) {
-  return Math.round(1280 - box.x - box.width)
-}
-
-function windowBottom(box) {
-  return Math.round(800 - box.y - box.height)
 }

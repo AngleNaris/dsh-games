@@ -108,7 +108,7 @@ function maxSize(row) {
 const sizeAscending = rows.every((row, i) => i === 0 || maxSize(row) >= maxSize(rows[i - 1]))
 if (!sizeAscending) failures.push('sizes do not grow toward the tip')
 
-// 5. pile hovers above the pet head (bottom row's visual bottom ≈ −0.16×size)
+// 5. pile hugs the pet box (bottom row's visual bottom ≈ −0.04×size)
 const bottom = sorted[0]
 const clearance = bottom.y + bottom.size * 0.68
 if (!(clearance < 10 && clearance > -20)) failures.push(`pile clearance off: visual bottom ≈ ${clearance.toFixed(0)}px vs pet top`)

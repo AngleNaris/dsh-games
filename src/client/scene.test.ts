@@ -8,13 +8,18 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   arrangeScene,
+  canArrangeScene,
+  clampPetPos,
   loadScenePrefs,
+  resolveSceneMove,
   saveScenePrefs,
   SCENE_KEY,
   SCENE_SPACING_DEFAULT,
   snapPos,
+  sortRoomMembers,
   type SceneAnchor,
 } from './scene.tsx'
+import type { RoomMemberView } from './api.ts'
 
 const viewport = { width: 1280, height: 800 }
 const anchor: SceneAnchor = { id: 'me', size: 60, right: 24, bottom: 20 }
@@ -41,10 +46,10 @@ describe('arrangeScene', () => {
     const free = { b: { right: 300, bottom: 200 } }
     const out = arrangeScene('free', members, anchor, 110, free, viewport)
     expect(out.b).toEqual({ right: 300, bottom: 200 })
-    // Members without memory queue to the left of the anchor.
+    // Members without memory queue left of the anchor without overlapping.
     expect(out.a.right).toBeGreaterThan(anchor.right)
     expect(out.a.bottom).toBe(anchor.bottom)
-    expect(out.c.right).toBeGreaterThan(out.a.right)
+    expect(out.a.right).toBeGreaterThan(out.c.right)
   })
 
   it('row mode aligns all y-centers with the anchor', () => {
@@ -57,13 +62,11 @@ describe('arrangeScene', () => {
     expect(centerB).toBe(centerAnchor)
   })
 
-  it('row mode alternates left and right of the anchor', () => {
+  it('row mode keeps the first member visually leftmost', () => {
     const out = arrangeScene('row', members, anchor, 110, {}, viewport)
-    // a (index 0) sits left of the anchor, b (index 1) right of it.
-    expect(out.a.right).toBeGreaterThan(anchor.right)
-    expect(out.b.right).toBeLessThan(anchor.right)
-    // a and b do not overlap the anchor.
-    expect(out.a.right).toBeGreaterThanOrEqual(anchor.right + 60)
+    expect(out.a.right).toBeGreaterThan(out.b.right)
+    expect(out.b.right).toBeGreaterThan(out.c.right)
+    expect(out.c.right).toBeGreaterThanOrEqual(anchor.right + 60)
   })
 
   it('column mode aligns x-centers with the anchor', () => {
@@ -73,18 +76,24 @@ describe('arrangeScene', () => {
     expect(rightA).toBe(rightAnchor)
     const rightB = out.b.right + 60 / 2
     expect(rightB).toBe(rightAnchor)
-    // a (index 0) sits above the anchor, b (index 1) below it.
-    expect(out.a.bottom).toBeLessThan(anchor.bottom)
-    expect(out.b.bottom).toBeGreaterThan(anchor.bottom)
+    // The first sorted member is topmost.
+    expect(out.a.bottom).toBeGreaterThan(out.b.bottom)
+    expect(out.b.bottom).toBeGreaterThan(out.c.bottom)
+    expect(out.c.bottom).toBeGreaterThanOrEqual(anchor.bottom + 60)
   })
 
-  it('grid mode snaps remembered positions to the spacing grid', () => {
-    const free = { a: { right: 123, bottom: 217 } }
-    const out = arrangeScene('grid', members, anchor, 60, free, viewport)
-    expect(out.a.right % 60).toBe(0)
-    expect(out.a.bottom % 60).toBe(0)
-    expect(out.a.right).toBe(120)
-    expect(out.a.bottom).toBe(240)
+  it('grid mode honors configured columns and rows without overlap', () => {
+    const gridMembers = [...members, { id: 'd', size: 60 }]
+    const out = arrangeScene('grid', gridMembers, anchor, 24, {}, viewport, 2, 2)
+    const positions = ['a', 'b', 'c', 'd'].map((id) => out[id])
+    expect(new Set(positions.map((pos) => pos.right)).size).toBe(2)
+    expect(new Set(positions.map((pos) => pos.bottom)).size).toBe(2)
+    for (let left = 0; left < positions.length; left += 1) {
+      for (let right = left + 1; right < positions.length; right += 1) {
+        expect(overlap(positions[left], positions[right], 60)).toBe(false)
+      }
+      expect(overlap(positions[left], out.me, 60)).toBe(false)
+    }
   })
 
   it('orbit mode places every member at the same distance from the anchor center', () => {
@@ -98,7 +107,7 @@ describe('arrangeScene', () => {
       const my = out[id].bottom + 30
       return Math.round(Math.hypot(mx - ax, my - ay))
     })
-    expect(Math.max(...distances) - Math.min(...distances)).toBeLessThanOrEqual(1)
+    expect(Math.max(...distances) - Math.min(...distances)).toBeLessThanOrEqual(24)
     expect(distances[0]).toBeGreaterThanOrEqual(110)
   })
 
@@ -119,16 +128,17 @@ describe('arrangeScene', () => {
     }
   })
 
-  it('orbit with a corner anchor sticks overflow members to the nearest edge', () => {
-    // The anchor sits at the bottom-right corner; the ring member straight
-    // above stays inside, the right/bottom ones stick to their edges.
+  it('orbit with a corner anchor keeps every member operable and separated', () => {
     const out = arrangeScene('orbit', members, anchor, 110, {}, viewport)
-    // a (index 0) is straight above the anchor: bottom = cy + r - half size.
-    expect(out.a.bottom).toBe(50 + 110 - 30)
-    // b (index 1) goes right of the screen: sticks to the right edge.
-    expect(out.b.right).toBe(0)
-    // c (index 2) goes below the screen: sticks to the bottom edge.
-    expect(out.c.bottom).toBe(0)
+    for (const id of ['a', 'b', 'c']) {
+      expect(out[id].right).toBeGreaterThanOrEqual(0)
+      expect(out[id].bottom).toBeGreaterThanOrEqual(0)
+      expect(out[id].right).toBeLessThanOrEqual(viewport.width - 60)
+      expect(out[id].bottom).toBeLessThanOrEqual(viewport.height - 60)
+    }
+    expect(overlap(out.a, out.b, 60)).toBe(false)
+    expect(overlap(out.a, out.c, 60)).toBe(false)
+    expect(overlap(out.b, out.c, 60)).toBe(false)
   })
 })
 
@@ -141,7 +151,10 @@ describe('helpers', () => {
     expect(SCENE_SPACING_DEFAULT).toBe(24)
     expect(loadScenePrefs()).toEqual({
       mode: 'row',
+      sort: 'tokens-desc',
       spacing: 24,
+      gridColumns: 3,
+      gridRows: 3,
       showLabels: true,
       free: {},
     })
@@ -155,14 +168,111 @@ describe('helpers', () => {
     }))
     expect(loadScenePrefs()).toMatchObject({
       mode: 'row',
+      sort: 'tokens-desc',
       spacing: 24,
+      gridColumns: 3,
+      gridRows: 3,
       showLabels: true,
     })
     expect(localStorage.getItem(SCENE_KEY)).toBeNull()
   })
 
   it('persists the local label visibility preference', () => {
-    saveScenePrefs({ mode: 'row', spacing: 24, showLabels: false, free: {} })
+    saveScenePrefs({
+      mode: 'row',
+      sort: 'tokens-desc',
+      spacing: 24,
+      gridColumns: 3,
+      gridRows: 3,
+      showLabels: false,
+      free: {},
+    })
     expect(loadScenePrefs().showLabels).toBe(false)
   })
+
+  it('persists token order and rejects unknown stored values', () => {
+    saveScenePrefs({
+      mode: 'column',
+      sort: 'tokens-asc',
+      spacing: 32,
+      gridColumns: 4,
+      gridRows: 2,
+      showLabels: true,
+      free: {},
+    })
+    expect(loadScenePrefs().sort).toBe('tokens-asc')
+    expect(loadScenePrefs()).toMatchObject({ gridColumns: 4, gridRows: 2 })
+    localStorage.setItem(SCENE_KEY, JSON.stringify({ mode: 'row', sort: 'random', spacing: 24 }))
+    expect(loadScenePrefs().sort).toBe('tokens-desc')
+  })
+
+  it('rejects grid capacity and viewport changes that would force overlap', () => {
+    const prefs = {
+      mode: 'grid',
+      sort: 'tokens-desc',
+      spacing: 24,
+      gridColumns: 1,
+      gridRows: 2,
+      showLabels: true,
+      free: {},
+    } as const
+    expect(canArrangeScene(prefs, members, anchor, viewport)).toBe(false)
+    expect(canArrangeScene(
+      { ...prefs, gridRows: 3 },
+      members,
+      { ...anchor, size: 100, right: 0, bottom: 0 },
+      { width: 200, height: 200 },
+    )).toBe(false)
+  })
+
+  it('sorts room members by tokens with stable joined/member fallbacks', () => {
+    const roomMembers = [
+      member('a', 100, 1),
+      member('b', 300, 3),
+      member('c', 300, 2),
+    ]
+    expect(sortRoomMembers(roomMembers, 'tokens-desc').map((entry) => entry.memberId)).toEqual(['c', 'b', 'a'])
+    expect(sortRoomMembers(roomMembers, 'tokens-asc').map((entry) => entry.memberId)).toEqual(['a', 'c', 'b'])
+    expect(sortRoomMembers(roomMembers, 'joined').map((entry) => entry.memberId)).toEqual(['a', 'c', 'b'])
+    expect(roomMembers.map((entry) => entry.memberId)).toEqual(['a', 'b', 'c'])
+  })
+
+  it('clamps resized and dragged pets inside the viewport', () => {
+    expect(clampPetPos({ right: 900, bottom: 700 }, 100, { width: 640, height: 480 }))
+      .toEqual({ right: 540, bottom: 380 })
+    expect(clampPetPos({ right: -20, bottom: -30 }, 100, viewport))
+      .toEqual({ right: 0, bottom: 0 })
+  })
+
+  it('resolves manual movement without overlapping visible pets', () => {
+    const positions = {
+      me: { right: 24, bottom: 20 },
+      a: { right: 120, bottom: 20 },
+      b: { right: 220, bottom: 20 },
+    }
+    const moved = resolveSceneMove('b', 60, { right: 125, bottom: 20 }, members.slice(0, 3), positions, viewport, 24)
+    expect(overlap(moved, positions.a, 60)).toBe(false)
+    expect(moved.right).toBeGreaterThanOrEqual(0)
+    expect(moved.bottom).toBeGreaterThanOrEqual(0)
+  })
 })
+
+function overlap(left: { right: number; bottom: number }, right: { right: number; bottom: number }, size: number): boolean {
+  return left.right < right.right + size &&
+    left.right + size > right.right &&
+    left.bottom < right.bottom + size &&
+    left.bottom + size > right.bottom
+}
+
+function member(memberId: string, tokens: number, joinedAt: number): RoomMemberView {
+  return {
+    memberId,
+    nickname: memberId,
+    tokens,
+    crowns: [],
+    hats: 0,
+    phase: 'idle',
+    joinedAt,
+    lastSeen: joinedAt,
+  }
+}

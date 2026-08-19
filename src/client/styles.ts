@@ -20,8 +20,19 @@ export const CSS = `
   user-select: none;
   -webkit-user-select: none;
 }
+.dsg-pet-root:hover,
+.dsg-pet-root:focus-within {
+  z-index: 970;
+}
 .dsg-pet-root[data-dragging='true'] {
   cursor: grabbing;
+  z-index: 980;
+}
+.dsg-pet-root[data-own='true'][data-chat-open='true'] {
+  z-index: 990;
+}
+.dsg-pet-root[data-own='true'][data-chat-open='true'] > .dsg-pet {
+  z-index: 990;
 }
 .dsg-pet {
   position: relative;
@@ -48,6 +59,7 @@ export const CSS = `
 }
 .dsg-whale-breathe > svg,
 .dsg-whale-breathe > .dsg-pet-img {
+  display: block;
   filter:
     drop-shadow(0 5px 7px rgba(15, 23, 42, 0.26))
     drop-shadow(0 1px 2px rgba(15, 23, 42, 0.18));
@@ -63,10 +75,10 @@ export const CSS = `
 }
 @keyframes dsg-sleep-breathe {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.025, 0.975); }
+  50% { transform: scale(1.04, 0.96); }
 }
 @keyframes dsg-wake-up {
-  from { transform: scale(1.025, 0.975); }
+  from { transform: scale(1.04, 0.96); }
   to { transform: scale(1); }
 }
 @keyframes dsg-active-float {
@@ -99,18 +111,18 @@ export const CSS = `
   isolation: isolate;
   left: 50%;
   transform: translateX(-50%);
-  top: calc(100% + 2px);
-  max-width: 220px;
+  top: 100%;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(var(--dsg-label-max-width, 160px), calc(100vw - 16px));
   background: var(--dsw-alias-bg-layer-3, #1f2836);
   color: var(--dsw-alias-label-primary, #e8e8f0);
   border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.16));
-  border-radius: 999px;
-  padding: 4px 10px;
+  border-radius: 8px;
+  padding: 5px 9px;
   font-size: 12px;
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.25;
+  white-space: normal;
   pointer-events: none;
   box-shadow: var(--dsw-shadow-lv2, 0 4px 12px rgba(0, 0, 0, 0.2));
   transition:
@@ -140,6 +152,31 @@ export const CSS = `
 .dsg-label-content {
   position: relative;
   z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  min-width: 0;
+  max-width: 100%;
+}
+.dsg-label-player {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary, #e8e8f0);
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dsg-label-tokens {
+  display: block;
+  color: var(--dsw-alias-label-tertiary, rgba(232, 232, 240, 0.68));
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.dsg-pet-root[data-own='true'] > .dsg-pet > .dsg-pet-label .dsg-label-player,
+.dsg-pet-root[data-own='true'] > .dsg-pet > .dsg-pet-label .dsg-label-tokens {
+  font-weight: 700;
 }
 /* Bubbles sit right above the bottom label bar (never under the crown pile)
    and on top of every pet layer. */
@@ -518,7 +555,7 @@ export const CSS = `
   flex: 1;
 }
 .dsg-member .dsg-member-name {
-  font-weight: 600;
+  font-weight: 400;
   color: var(--dsw-alias-label-primary, #fff);
   font-size: 13px;
   overflow: hidden;
@@ -532,6 +569,10 @@ export const CSS = `
 .dsg-member.dsg-member-you {
   background: var(--dsw-alias-bg-layer-2, #19212d);
   border: 1px solid var(--dsw-alias-button-info-fill, rgba(77, 107, 254, 0.55));
+}
+.dsg-member.dsg-member-you .dsg-member-name,
+.dsg-member.dsg-member-you .dsg-member-sub {
+  font-weight: 700;
 }
 .dsg-member-dot {
   width: 8px;
@@ -849,7 +890,7 @@ export const CSS = `
   display: inline-block;
   font-style: normal;
   color: var(--dsw-alias-state-success-primary, #7ee2a8);
-  margin-left: 6px;
+  margin-left: 4px;
   font-weight: 700;
   animation: dsg-chip-pop 1.8s ease-out forwards;
 }
@@ -1079,6 +1120,45 @@ export const CSS = `
   color: var(--dsw-alias-label-primary, #fff);
   box-shadow: inset 0 0 0 1px var(--dsw-alias-button-info-fill, rgba(77, 107, 254, 0.45));
 }
+.dsg-grid-size {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 8px;
+  margin-top: 6px;
+}
+.dsg-grid-size > label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: var(--dsw-alias-label-secondary, rgba(232, 232, 240, 0.8));
+  font-size: 12px;
+}
+.dsg-grid-size > span {
+  padding-bottom: 7px;
+  color: var(--dsw-alias-label-tertiary, rgba(232, 232, 240, 0.6));
+}
+.dsg-grid-size input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  box-sizing: border-box;
+  border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.14));
+  border-radius: 6px;
+  padding: 0 8px;
+  background: var(--dsw-alias-bg-layer-2, #19212d);
+  color: var(--dsw-alias-label-primary, #fff);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.dsg-grid-size input:focus {
+  outline: 2px solid var(--dsw-alias-brand-primary, #4d6bfe);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.dsg-scene-note {
+  margin: 6px 0 0;
+}
 .dsg-room-visibility-tag {
   display: inline-block;
   margin-left: 6px;
@@ -1116,6 +1196,17 @@ export const CSS = `
 .dsg-scene-label {
   opacity: 0;
   z-index: 3;
+}
+.dsg-pet:hover > .dsg-whale-wrap {
+  z-index: 20;
+}
+.dsg-pet:hover > .dsg-pet-label {
+  z-index: 30;
+}
+.dsg-pet:hover > .dsg-chat-hint,
+.dsg-pet:hover > .dsg-chat-bubble,
+.dsg-pet:focus-within > .dsg-chat-composer {
+  z-index: 40;
 }
 .dsg-pet:hover > .dsg-pet-label.dsg-scene-label,
 .dsg-pet[data-show-label='true'] > .dsg-pet-label.dsg-scene-label,
@@ -1160,12 +1251,12 @@ export const CSS = `
   cursor: default;
 }
 .dsg-chat-bubble {
-  /* 10 CJK chars at 14px + padding: lines wrap at ~10 chars even when the
-     hosting pet is smaller than the bubble (the bubble overflows the pet). */
-  min-width: 168px;
-  max-width: 280px;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 0;
+  max-width: min(280px, calc(100vw - 24px));
   white-space: normal;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   font-size: 14px;
   line-height: 1.5;
   padding: 6px 14px;
@@ -1183,18 +1274,17 @@ export const CSS = `
   0% { opacity: 1; transform: translateX(-50%) scale(1); }
   100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(0.9); }
 }
-.dsg-chat-from {
-  font-weight: 600;
-}
 .dsg-chat-composer {
   position: absolute;
-  left: 50%;
+  left: calc(50% + var(--dsg-chat-composer-shift-x, 0px));
   transform: translateX(-50%);
   top: calc(100% - 30px);
-  z-index: 6;
+  z-index: 40;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 6px;
+  width: min(286px, calc(100vw - 16px));
   background: var(--dsw-alias-bg-layer-3, #1f2836);
   border: 1px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.16));
   border-radius: 999px;
@@ -1202,7 +1292,9 @@ export const CSS = `
   box-shadow: var(--dsw-shadow-lv2, 0 4px 12px rgba(0, 0, 0, 0.2));
 }
 .dsg-chat-composer .dsg-chat-input {
-  width: 170px;
+  flex: 1;
+  width: auto;
+  min-width: 0;
   border: 0;
   background: transparent;
   color: var(--dsw-alias-label-primary, #e8e8f0);
@@ -1214,9 +1306,11 @@ export const CSS = `
   color: var(--dsw-alias-label-tertiary, rgba(232, 232, 240, 0.6));
 }
 .dsg-chat-composer .dsg-btn {
+  flex: none;
   padding: 4px 10px;
   font-size: 12px;
   border-radius: 999px;
+  white-space: nowrap;
 }
 .dsg-chat-close {
   display: grid;

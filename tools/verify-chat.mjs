@@ -1,10 +1,10 @@
 /**
  * Room chat verification: hover the pet to reveal the chat hint, click it to
  * open the composer, send a message — the pet pops a bubble for 4s and the
- * sender is locked until it fades; the bubble wraps at ~10 chars per line
- * (20 chars max) and fades out with an exit animation; the other player's pet
- * shows the message (via the room heartbeat) with a nickname prefix, and they
- * can reply back.
+ * sender is locked until it fades; the bubble fits short text, wraps longer
+ * text within its viewport-safe cap, and fades out; the other player's pet
+ * shows the message text (via the room heartbeat) without duplicating the
+ * nickname already shown in the pet label, and they can reply back.
  * @module dsh-games/tools/verify-chat
  */
 
@@ -20,8 +20,8 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const ARTIFACTS = join(ROOT, 'tools', 'artifacts')
 mkdirSync(ARTIFACTS, { recursive: true })
 
-const A = 'http://127.0.0.1:3080'
-const B = 'http://127.0.0.1:3081'
+const A = process.env.DSG_VERIFY_A ?? 'http://127.0.0.1:3080'
+const B = process.env.DSG_VERIFY_B ?? 'http://127.0.0.1:3081'
 const GAME_SERVER = process.env.DSG_VERIFY_SERVER ?? ''
 const GAME_AUTH = process.env.DSG_VERIFY_AUTH ?? ''
 const ROOM_SERVER = GAME_SERVER || A
@@ -47,12 +47,16 @@ const origDisplayA = stateA.display
 const restore = async () => {
   await post(`${A}/api/games/config`, origA).catch(() => {})
   await post(`${B}/api/games/config`, origB).catch(() => {})
+  await post(`${A}/api/games/pet-meta`, { pet: stateA.pet ?? null }).catch(() => {})
+  await post(`${B}/api/games/pet-meta`, { pet: stateB.pet ?? null }).catch(() => {})
   await Promise.all([
     waitForGameConfig(A, origA.serverUrl, origA.authToken).catch(() => {}),
     waitForGameConfig(B, origB.serverUrl, origB.authToken).catch(() => {}),
   ])
   await post(`${A}/api/games/display`, origDisplayA).catch(() => {})
 }
+await post(`${A}/api/games/pet-meta`, { pet: null })
+await post(`${B}/api/games/pet-meta`, { pet: null })
 await post(`${A}/api/games/config`, { serverUrl: ROOM_SERVER, authToken: GAME_AUTH })
 await post(`${B}/api/games/config`, { serverUrl: ROOM_SERVER, authToken: GAME_AUTH })
 await Promise.all([
@@ -163,9 +167,30 @@ try {
   // ---- (2) the composer can close without sending and preserves its draft ----
   await pageA.click('.dsg-chat-hint')
   await pageA.waitForSelector('.dsg-chat-composer input')
+  const composerLayers = await pageA.locator('.dsg-chat-composer').evaluate((composer) => {
+    const pet = composer.closest('.dsg-pet')
+    const root = composer.closest('.dsg-pet-root')
+    const remote = root?.querySelector('.dsg-scene-root')
+    return {
+      root: root instanceof HTMLElement ? Number(getComputedStyle(root).zIndex) : 0,
+      pet: pet instanceof HTMLElement ? Number(getComputedStyle(pet).zIndex) : 0,
+      composer: Number(getComputedStyle(composer).zIndex),
+      remote: remote instanceof HTMLElement ? Number(getComputedStyle(remote).zIndex) : 0,
+    }
+  })
+  if (composerLayers.root < 990 || composerLayers.pet <= composerLayers.remote || composerLayers.composer < 40) {
+    throw new Error(`composer is not the top interaction layer: ${JSON.stringify(composerLayers)}`)
+  }
   const maxLen = await pageA.locator('.dsg-chat-composer input').getAttribute('maxlength')
   if (maxLen !== '20') throw new Error(`composer maxlength: ${maxLen}`)
-  console.log('[chat] composer caps input at 20 chars')
+  const composerRect = await pageA.locator('.dsg-chat-composer').evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    return { left: rect.left, right: rect.right, viewportWidth: window.innerWidth }
+  })
+  if (composerRect.left < 8 || composerRect.right > composerRect.viewportWidth - 8) {
+    throw new Error(`composer escaped the viewport: ${JSON.stringify(composerRect)}`)
+  }
+  console.log(`[chat] composer caps input at 20 chars, stays above remote pets, and remains in view: ${JSON.stringify({ ...composerLayers, ...composerRect })}`)
   await pageA.fill('.dsg-chat-composer input', '保留草稿')
   await pageA.keyboard.press('Escape')
   await pageA.waitForSelector('.dsg-chat-composer', { state: 'hidden' })
@@ -193,16 +218,15 @@ try {
   // The chat hint must hide while the content bubble is up.
   const hintDuring = await pageA.locator('.dsg-chat-hint').count()
   if (hintDuring !== 0) throw new Error('chat hint still visible during own bubble')
-  // Bubble geometry: wide enough for 10 CJK chars per line, so the 20-char
-  // message renders as exactly 2 lines (~54px tall).
+  // A maximum-length message stays within the viewport-safe cap and wraps.
   const geom = await pageA.locator('.dsg-pet .dsg-chat-bubble').first().evaluate((el) => {
     const cs = getComputedStyle(el)
-    return { minWidth: parseFloat(cs.minWidth), height: el.offsetHeight, font: cs.fontSize }
+    return { width: el.offsetWidth, minWidth: parseFloat(cs.minWidth), height: el.offsetHeight, font: cs.fontSize }
   })
-  if (geom.minWidth < 160) throw new Error(`chat bubble too narrow: ${geom.minWidth}`)
-  if (geom.height < 48 || geom.height > 64) throw new Error(`chat bubble line wrap off (want 2 lines @10 chars): ${geom.height}`)
+  if (geom.minWidth !== 0 || geom.width > 280) throw new Error(`chat bubble width cap is wrong: ${JSON.stringify(geom)}`)
+  if (geom.height < 48 || geom.height > 80) throw new Error(`chat bubble did not wrap cleanly: ${geom.height}`)
   if (Number.parseFloat(geom.font) < 13.5) throw new Error(`chat bubble font too small: ${geom.font}`)
-  console.log(`[chat] A sent 20 chars, bubble wraps at 10/line (min-width ${geom.minWidth}, height ${geom.height})`)
+  console.log(`[chat] A sent 20 chars, bubble wraps within ${geom.width}px (height ${geom.height})`)
   await pageA.screenshot({ path: join(ARTIFACTS, '40-chat-A-sent.png') })
 
   // ---- (4) cooldown: no chat UI at all while the own bubble is up ----
@@ -222,12 +246,31 @@ try {
   await pageB.waitForTimeout(400)
   await pageB.click('.dsg-chat-hint')
   await pageB.waitForSelector('.dsg-chat-composer input', { timeout: 5_000 })
-  await pageB.fill('.dsg-chat-composer input', '收到！我在 B 实例')
+  const shortReply = '收到！'
+  await pageB.fill('.dsg-chat-composer input', shortReply)
   await pageB.keyboard.press('Enter')
   await pageA.waitForSelector('[data-testid="games-scene-pet"] .dsg-chat-bubble', { timeout: 8_000 })
-  const memberBubble = await pageA.locator('[data-testid="games-scene-pet"] .dsg-chat-bubble').first().innerText()
-  if (!memberBubble.includes('收到！我在 B 实例')) throw new Error(`member bubble text: ${memberBubble}`)
-  console.log('[chat] A saw B\'s message on B\'s pet:', memberBubble)
+  const memberBubbleLocator = pageA.locator('[data-testid="games-scene-pet"] .dsg-chat-bubble').first()
+  const memberBubble = await memberBubbleLocator.innerText()
+  if (memberBubble !== shortReply) throw new Error(`member bubble text includes an unexpected prefix: ${memberBubble}`)
+  const nicknamePrefixes = await pageA.locator('[data-testid="games-scene-pet"] .dsg-chat-from').count()
+  if (nicknamePrefixes !== 0) throw new Error(`member bubble still renders nickname prefixes: ${nicknamePrefixes}`)
+  await memberBubbleLocator.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map(async (animation) => {
+      await animation.finished.catch(() => {})
+    }))
+  })
+  const shortGeom = await memberBubbleLocator.evaluate((element) => {
+    const range = document.createRange()
+    range.selectNodeContents(element)
+    const textWidth = range.getBoundingClientRect().width
+    return { outerWidth: element.getBoundingClientRect().width, textWidth }
+  })
+  const bubbleChrome = shortGeom.outerWidth - shortGeom.textWidth
+  if (shortGeom.outerWidth >= 168 || bubbleChrome < 24 || bubbleChrome > 36) {
+    throw new Error(`short bubble does not fit its text: ${JSON.stringify(shortGeom)}`)
+  }
+  console.log(`[chat] A saw B's short message in a content-fit ${shortGeom.outerWidth.toFixed(0)}px bubble: ${memberBubble}`)
   await pageA.screenshot({ path: join(ARTIFACTS, '41-chat-B-to-A.png') })
 
   // ---- (6) the member bubble also fades out with an animation ----

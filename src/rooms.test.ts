@@ -5,6 +5,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  DEFAULT_MEMBER_TTL_MS,
   MESSAGE_COOLDOWN_MS,
   MESSAGE_TTL_MS,
   RoomStore,
@@ -174,6 +175,19 @@ describe('RoomStore member sessions', () => {
 
     store.sweep(1_101)
 
+    expect(store.getRoom(room.code)?.members).toHaveLength(0)
+  })
+
+  it('keeps background-throttled members for the two-minute browser lease', () => {
+    expect(DEFAULT_MEMBER_TTL_MS).toBe(120_000)
+    const store = new RoomStore({ roomTtlMs: 1_000 })
+    const room = store.createRoom({}, 1_000)
+    join(store, room.code, MEMBER_A, 'Alice', 1_000)
+
+    store.sweep(121_000)
+    expect(store.getRoom(room.code)?.members).toHaveLength(1)
+
+    store.sweep(121_001)
     expect(store.getRoom(room.code)?.members).toHaveLength(0)
   })
 

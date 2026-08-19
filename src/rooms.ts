@@ -150,7 +150,11 @@ export interface RoomStoreOptions {
   antiCheat?: AntiCheatGuard
 }
 
-export const DEFAULT_MEMBER_TTL_MS = 20_000
+// Chrome may throttle long-hidden tabs to roughly one timer wake-up per
+// minute. Two minutes leaves room for that wake-up, one bounded request, and
+// the server's 10-second sweep cadence without making departed pets linger
+// for the full room lifetime.
+export const DEFAULT_MEMBER_TTL_MS = 2 * 60_000
 export const DEFAULT_ROOM_TTL_MS = 10 * 60_000
 export const DEFAULT_MAX_MEMBERS = 32
 export const ROOM_NAME_MAX_LENGTH = 24
