@@ -39,6 +39,9 @@
     "cordis.patch.yml",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "BSD-3-Clause",
   "dsh": {
     "bundle": {
